@@ -1,0 +1,311 @@
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import ListAdapter kivy.adapters.listadapter.ListAdapter
+#:import Factory kivy.factory.Factory
+
+<Button>
+	background_color: ""
+	background_down: ""
+	background_disabled_down: ""
+	background_disabled_normal: ""
+	markup: True
+	shorten: True
+	shorten_from: 'right'
+
+<Label>
+	markup: True
+	shorten: True
+	shorten_from: 'right'
+	size_hint: None, None
+
+<TextInput>
+	background_disabled_active: ""
+	background_disabled_normal: ""
+	background_normal: ""
+	background_active: ""
+	font_size: 13
+
+<SettingsServerItem>
+	orientation: 'vertical'
+	size_hint: None, None
+	size: 300, 21
+	input_box: input_box
+
+	BoxLayout:
+		orientation: 'horizontal'
+		size: 300, 20
+		id: input_box
+		
+		name_input: name
+		url_input: url
+
+		Button:
+			canvas.before:
+                Color:
+                    rgba: get_color_from_hex('E2007A')
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            text: 'del'
+			size: 20, 20
+			font_size: 10
+			on_release: root.delete_server()
+
+		Label:
+			size: 5, 20
+
+		TextInput:
+			id: name
+			text: root.name
+			hint_text: 'name'
+			size_hint: None, None
+			size: 75, 20
+			hint_text: 'Name'
+			multiline: False
+			padding: 6,2,6,2
+			background_color: 1, 1, 1, 1
+			on_text_validate: root.add_server()
+
+		Label:
+			size: 5, 20
+			
+		TextInput:
+			id: url
+			text: root.url
+			hint_text: 'url'
+			size_hint: None, None
+			size: 195, 20
+			hint_text: 'Url'
+			multiline: False
+			padding: 6,2,6,2
+			background_color: 1, 1, 1, 1
+			on_text_validate: root.add_server()
+
+	Label:
+		size: 300, 1
+
+
+<ActionServerItem>
+	orientation: 'vertical'
+	size_hint: None, None
+	size: 300, 21
+	input_box: input_box
+	checkbox: checkbox
+	BoxLayout:
+		orientation: 'horizontal'
+		size: 300, 20
+		id: input_box
+		
+		name_input: name
+		url_input: url
+
+		Button:
+			canvas.before:
+                Color:
+                    rgba: get_color_from_hex('97BE0D')
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            id: checkbox
+			size: 20, 20
+			font_size: 10
+			on_press: root.pressed_but()
+
+		Label:
+			size: 5, 20
+
+		TextInput:
+			id: name
+			text: root.name
+			hint_text: 'name'
+			size_hint: None, None
+			size: 75, 20
+			hint_text: 'Name'
+			multiline: False
+			padding: 6,2,6,2
+			background_color: 1, 1, 1, 1
+			readonly: True
+
+		Label:
+			size: 5, 20
+			
+		TextInput:
+			id: url
+			text: root.url
+			hint_text: 'url'
+			size_hint: None, None
+			size: 275, 20
+			hint_text: 'Url'
+			multiline: False
+			padding: 6,2,6,2
+			background_color: 1, 1, 1, 1
+			readonly: True
+
+	Label:
+		size: 300, 1
+
+<Deployment>
+	action_screen: action_screen
+	settings_screen: settings_screen
+
+	Screen:
+		id: action_screen
+		name: 'action_screen'
+		
+		branch: branch
+
+		FloatLayout:
+			Label:
+				text: '[b]Deployment[/b]'
+				text_size: self.width, None
+                size: 100, 20
+                pos: 10, 270
+
+            Button:
+            	canvas.before:
+                    Color:
+                        rgba: get_color_from_hex('404248')
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                text: 'Settings'
+                size_hint: None, None
+                size: 100, 20
+                pos: 290, 270
+                on_press: root.load_servers();
+                on_release: root.switch_screen('settings_screen', side='left');root.servers_correction_screenbased('settings')
+
+            Label:
+            	canvas.before:
+                    Color:
+                        rgba: 0,0,0,1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                size: 400, 1
+                pos: 0, 260
+
+            TextInput:
+    			id: branch
+    			size_hint: None, None
+    			pos: 10, 230
+            	size: 100, 20
+    			hint_text: 'Branch..'
+    			multiline: False
+    			padding: 6,2,6,2
+    			background_color: 1, 1, 1, 1
+
+            ListView:
+            	size_hint: None, None
+    			size: 380, 159
+    			pos: 10, 61
+
+    			adapter: ListAdapter(data=root.servers, cls=Factory.ActionServerItem, args_converter=root.servers_to_items)
+
+    		Label:
+            	canvas.before:
+                    Color:
+                        rgba: 0,0,0,1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                size: 400, 1
+                pos: 0, 50
+
+    		Button:
+    			canvas.before:
+                    Color:
+                        rgba: get_color_from_hex('E2007A')
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                text: "[b]DEPLOY[/b]"
+                pos: 10, 10
+                size: 100, 30
+
+    Screen:
+		id: settings_screen
+		name: 'settings_screen'
+
+		username_input: username
+		password_input: password
+
+		FloatLayout:
+			Label:
+				text: '[b]Deployment[/b]'
+            	text_size: self.width, None
+			    size: 100, 20
+                pos: 10, 270
+
+        	Button:
+            	canvas.before:
+                    Color:
+                        rgba: get_color_from_hex('97BE0D')
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                text: 'Done'
+                size_hint: None, None
+                size: 100, 20
+                pos: 290, 270
+                on_press: root.load_servers();
+                on_release: root.switch_screen('action_screen', side='right');root.servers_correction_screenbased('action')
+
+            Label:
+            	canvas.before:
+                    Color:
+                        rgba: 0,0,0,1
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                size: 400, 1
+                pos: 0, 260
+
+            Label:
+            	text: "Username"
+            	size: 80, 20
+            	pos: 10, 230
+            	text_size: self.width, None
+
+            TextInput:
+    			id: username
+    			text: root.username
+    			size_hint: None, None
+    			size: 300, 20
+    			pos: 90, 230
+    			hint_text: 'Username'
+    			multiline: False
+    			padding: 6,2,6,2
+    			background_color: 1, 1, 1, 1
+    			on_text_validate: root.uanme_pword_update()
+
+    		Label:
+            	text: "Password"
+            	size: 80, 20
+            	pos: 10, 200
+            	text_size: self.width, None
+
+            TextInput:
+    			id: password
+    			text: root.password
+    			size_hint: None, None
+    			size: 300, 20
+    			pos: 90, 200
+    			hint_text: 'Password'
+    			multiline: False
+    			password: True
+    			padding: 6,2,6,2
+    			background_color: 1, 1, 1, 1
+    			on_text_validate: root.uanme_pword_update()
+
+    		Label:
+    			text: 'Servers'
+    			size: 80, 20
+    			pos: 10, 170
+    			text_size: self.width, None
+
+    		ListView:
+    			size_hint: None, None
+    			size: 300, 180
+    			pos: 90, 10
+
+    			adapter: ListAdapter(data=root.servers, cls=Factory.SettingsServerItem, args_converter=root.servers_to_items)
