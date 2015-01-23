@@ -209,7 +209,6 @@ class Deployment(ScreenManager):
 			else:
 				call = requests[0]
 				result, message = call()
-				print call, result, message
 				if not result:
 					self.display_message(self.current_screen, message)()
 					return False
