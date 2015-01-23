@@ -6,9 +6,12 @@ from kivy.uix.screenmanager import SlideTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.config import Config
 from kivy.uix.image import Image
+from kivy.clock import Clock
 from kivy.utils import get_color_from_hex
 from kivy.properties import ListProperty, StringProperty
-from config import PROJECT_PATH, DB
+from config import PROJECT_PATH, DB, CALLS, run_syscall
+import os
+
 
 def findparent(curclass, targetclass):
 	reqclass = curclass
@@ -47,6 +50,7 @@ class ActionServerItem(BoxLayout):
 			self.checkbox.add_widget(image)
 			self.input_box.name_input.background_color = get_color_from_hex('eeeeee')
 			self.input_box.url_input.background_color = get_color_from_hex('eeeeee')
+			
 
 class SettingsServerItem(BoxLayout):
 	name = StringProperty("")
@@ -102,7 +106,7 @@ class Deployment(ScreenManager):
 		self.current = screen
 
 
-	def uanme_pword_update(self):
+	def uname_pword_update(self):
 		username = self.current_screen.username_input.text.strip()
 		password = self.current_screen.password_input.text.strip()
 
@@ -133,6 +137,101 @@ class Deployment(ScreenManager):
 			'url': item['url']
 		}
 
+
+	def authentication_check(self, name, server):
+		result = message = ""
+		os.chdir('%(path)s'%{'path': PROJECT_PATH})
+		out, err = run_syscall('fab authentication_check:%(username)s,%(password)s,%(server)s'%\
+							{'username': self.username, 'password':self.password, 'server': server})
+		
+		try:
+			result = out.split('DEPLOYMENT:')
+			result = result[1].split(":")[0].strip()
+			result = True and result == "True" or False
+		except:
+			result = False
+		if not result:
+			message = u"%s authentication failed"%name
+
+		return result, message
+
+
+	def branch_check(self, name, branch):
+		result = message = ""
+		os.chdir("/tmp")
+		out, err = run_syscall('git archive %(branch)s --prefix=%(branch)s/ --remote=git@gitlab.markafoni.net:dikeyshop/dikeyshop.git | tar -xf -'%{'branch':branch})
+		out = out.strip()
+
+		if out.find('tar: Exiting with failure status due to previous errors') != -1 or \
+			err.find('tar: Exiting with failure status due to previous errors') != -1:
+			result = False
+			message = u"Branch not found for %s"%name 
+		else:
+			out, err = run_syscall("rm -rf %s"%branch)
+			result = True
+		os.chdir(PROJECT_PATH)
+		return result, message
+
+
+	def display_message(self, screen, message):
+		screen.info.text = message
+
+
+	def deploy_server(self, username, password, name, url, branch):
+		def inner():
+			if name not in CALLS:
+				display_message(self.current_screen, u"Required call cannot be found")
+			else:
+				out, err = run_syscall("fab %(call)s:%(branch)s,%(username)s,%(password)s,%(server)s"%\
+									{'call': CALLS['%s'%name],
+									 'branch': branch,
+									 'username': username,
+									 'password': password,
+									 'server': url})
+
+			self.display_message(self.current_screen, u'%s --> %s'%(branch, name))
+		return inner
+
+
+	def deploymentComplition(self, requests):
+		if requests:
+			call = requests[0]
+			call()
+			Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:]), 1)
+
+
+	def deploy(self):
+		if self.current == "action_screen":
+			screen = self.current_screen
+			branch = screen.branch.text.strip()
+			if not branch:
+				screen.info.text = u"'branch' is empty!"
+			else:
+				servers = screen.server_items.children[0].children[0].children
+				checked_servers = filter(lambda x: x.checkbox.children, servers)
+				if not checked_servers:
+					self.display_message(screen, u"at least check one server please!")
+				else:
+					for server in checked_servers:
+						name = server.input_box.name_input.text.strip()
+						url = server.input_box.url_input.text.strip()
+						result, message = self.authentication_check(name, url)
+						if not result:
+							self.display_message(screen, message)
+							return False
+						result, message = self.branch_check(name, branch)
+						if not result:
+							self.display_message(screen, message)
+							return False
+					requests = []
+					for server in checked_servers:
+						name = server.input_box.name_input.text.strip()
+						url = server.input_box.url_input.text.strip()
+						tmp_call = self.deploy_server(self.username,
+													  self.password,
+													  name, url, branch)
+						requests.append(tmp_call)
+					self.deploymentComplition(requests)
 
 class DeploymentApp(App):
 	def __init__(self, *args, **kwargs):

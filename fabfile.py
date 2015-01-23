@@ -6,34 +6,43 @@ from fabric.contrib.files import exists, sed
 from fabric.operations import sudo, put
 import os,time, httplib
 
-@hosts(['emu.markafoni.net'])
-def deploy_zizigo(branch):
-	print  "---local zizigo deployment---"
-	env.user = "barbaros.yildirim"
-	env.password = "89TuBa87"
+
+def authentication_check(username, password, server):
+	with settings(warn_only=True, abort_on_prompts=True):
+		env.host_string = server
+		env.user = username
+		env.password = password
+		result = True
+		try:
+			tmp = sudo('ls')
+		except:
+			result = False
+		print "DEPLOYMENT:%s:ENDDEPLOYMENT"%result
+
+
+def deploy_zizigo(branch, username, password, server):
+	env.host_string = server
+	env.user = username
+	env.password = password
 	sudo('deploy_fila2 %s'%branch)
-	print "\n\n"
 
-@hosts(['emu.markafoni.net'])
-def deploy_misspera(branch):
-	print  "---local misspera deployment---"
-	env.user = "barbaros.yildirim"
-	env.password = "89TuBa87"
+
+def deploy_misspera(branch, username, password, server):
+	env.host_string = server
+	env.user = username
+	env.password = password
 	sudo('deploy_cosmo2 %s'%branch)
-	print "\n\n"
 
-@hosts(['emu.markafoni.net'])
-def deploy_enmoda(branch):
-	print  "---local enmoda deployment---"
-	env.user = "barbaros.yildirim"
-	env.password = "89TuBa87"
+
+def deploy_enmoda(branch, username, password, server):
+	env.host_string = server
+	env.user = username
+	env.password = password
 	sudo('deploy_caracas2 %s'%branch)
-	print "\n\n"
 
-@hosts(['emu.markafoni.net'])
-def deploy_all(branch):
-	print  "---local vertical sites deployment---"
-	env.user = "barbaros.yildirim"
-	env.password = "89TuBa87"
+
+def deploy_all(branch, username, password, server):
+	env.host_string = server
+	env.user = username
+	env.password = password
 	sudo('deploy2_all %s'%branch)
-	print "\n\n"

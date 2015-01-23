@@ -1,6 +1,7 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 #:import ListAdapter kivy.adapters.listadapter.ListAdapter
 #:import Factory kivy.factory.Factory
+#:import KIVY_VERSION config.KIVY_VERSION
 
 <Button>
 	background_color: ""
@@ -45,10 +46,13 @@
                 Rectangle:
                     size: self.size
                     pos: self.pos
-            text: 'del'
 			size: 20, 20
 			font_size: 10
 			on_release: root.delete_server()
+			Image:
+				source: "assets/cross2.png"
+				pos: self.parent.pos
+				size: self.parent.size
 
 		Label:
 			size: 5, 20
@@ -150,7 +154,9 @@
 	Screen:
 		id: action_screen
 		name: 'action_screen'
-		
+
+		server_items: server_items
+		info: info
 		branch: branch
 
 		FloatLayout:
@@ -195,6 +201,7 @@
     			background_color: 1, 1, 1, 1
 
             ListView:
+            	id: server_items
             	size_hint: None, None
     			size: 380, 159
     			pos: 10, 61
@@ -221,6 +228,13 @@
                 text: "[b]DEPLOY[/b]"
                 pos: 10, 10
                 size: 100, 30
+                on_press: root.deploy()
+
+            Label:
+                id: info
+            	size: 270, 30
+            	pos: 120, 10
+            	text_size: self.width, None
 
     Screen:
 		id: settings_screen
@@ -276,7 +290,7 @@
     			multiline: False
     			padding: 6,2,6,2
     			background_color: 1, 1, 1, 1
-    			on_text_validate: root.uanme_pword_update()
+    			on_text_validate: root.uname_pword_update()
 
     		Label:
             	text: "Password"
@@ -295,7 +309,7 @@
     			password: True
     			padding: 6,2,6,2
     			background_color: 1, 1, 1, 1
-    			on_text_validate: root.uanme_pword_update()
+    			on_text_validate: root.uname_pword_update()
 
     		Label:
     			text: 'Servers'
