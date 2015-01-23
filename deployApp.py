@@ -139,48 +139,55 @@ class Deployment(ScreenManager):
 
 
 	def authentication_check(self, name, server):
-		result = message = ""
-		os.chdir('%(path)s'%{'path': PROJECT_PATH})
-		out, err = run_syscall('fab authentication_check:%(username)s,%(password)s,%(server)s'%\
-							{'username': self.username, 'password':self.password, 'server': server})
-		
-		try:
-			result = out.split('DEPLOYMENT:')
-			result = result[1].split(":")[0].strip()
-			result = True and result == "True" or False
-		except:
-			result = False
-		if not result:
-			message = u"%s authentication failed"%name
+		def inner_authentication_check():
+			result = message = ""
+			os.chdir('%(path)s'%{'path': PROJECT_PATH})
+			out, err = run_syscall('fab authentication_check:%(username)s,%(password)s,%(server)s'%\
+								{'username': self.username, 'password':self.password, 'server': server})
+			
+			try:
+				result = out.split('DEPLOYMENT:')
+				result = result[1].split(":")[0].strip()
+				result = True and result == "True" or False
+			except:
+				result = False
+			if not result:
+				message = u"%s authentication failed"%name
 
-		return result, message
+			return result, message
+		return inner_authentication_check
 
 
 	def branch_check(self, name, branch):
-		result = message = ""
-		os.chdir("/tmp")
-		out, err = run_syscall('git archive %(branch)s --prefix=%(branch)s/ --remote=git@gitlab.markafoni.net:dikeyshop/dikeyshop.git | tar -xf -'%{'branch':branch})
-		out = out.strip()
+		def inner_branch_check():
+			result = message = ""
+			os.chdir("/tmp")
+			out, err = run_syscall('git archive %(branch)s --prefix=%(branch)s/ --remote=git@gitlab.markafoni.net:dikeyshop/dikeyshop.git | tar -xf -'%{'branch':branch})
+			out = out.strip()
 
-		if out.find('tar: Exiting with failure status due to previous errors') != -1 or \
-			err.find('tar: Exiting with failure status due to previous errors') != -1:
-			result = False
-			message = u"Branch not found for %s"%name 
-		else:
-			out, err = run_syscall("rm -rf %s"%branch)
-			result = True
-		os.chdir(PROJECT_PATH)
-		return result, message
+			if out.find('tar: Exiting with failure status due to previous errors') != -1 or \
+				err.find('tar: Exiting with failure status due to previous errors') != -1:
+				result = False
+				message = u"Branch not found for %s"%name 
+			else:
+				out, err = run_syscall("rm -rf %s"%branch)
+				result = True
+			os.chdir(PROJECT_PATH)
+			return result, message
+		return inner_branch_check
 
 
 	def display_message(self, screen, message):
-		screen.info.text = message
+		def inner_display_message():
+			screen.info.text = message
+			return True, ""
+		return inner_display_message
 
 
 	def deploy_server(self, username, password, name, url, branch):
-		def inner():
+		def inner_deploy_server():
 			if name not in CALLS:
-				display_message(self.current_screen, u"Required call cannot be found")
+				return False, u"Required call cannot be found"
 			else:
 				out, err = run_syscall("fab %(call)s:%(branch)s,%(username)s,%(password)s,%(server)s"%\
 									{'call': CALLS['%s'%name],
@@ -188,17 +195,28 @@ class Deployment(ScreenManager):
 									 'username': username,
 									 'password': password,
 									 'server': url})
+				self.display_message(self.current_screen, u'%s --> %s'%(branch, name))()
+				return True, ""
+		return inner_deploy_server
 
-			self.display_message(self.current_screen, u'%s --> %s'%(branch, name))
-		return inner
 
-
-	def deploymentComplition(self, requests):
+	def deploymentComplition(self, requests, output=False):
 		if requests:
-			call = requests[0]
-			call()
-			Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:]), 1)
-
+			if not output:
+				call = requests[0]
+				call()
+				Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:]), 1)
+			else:
+				call = requests[0]
+				result, message = call()
+				print call, result, message
+				if not result:
+					self.display_message(self.current_screen, message)()
+					return False
+				else:
+					Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:], output=True), 1)
+		else:
+			return True
 
 	def deploy(self):
 		if self.current == "action_screen":
@@ -210,28 +228,29 @@ class Deployment(ScreenManager):
 				servers = screen.server_items.children[0].children[0].children
 				checked_servers = filter(lambda x: x.checkbox.children, servers)
 				if not checked_servers:
-					self.display_message(screen, u"at least check one server please!")
+					self.display_message(screen, u"at least check one server please!")()
 				else:
+					result = True
+					requests = []
 					for server in checked_servers:
 						name = server.input_box.name_input.text.strip()
 						url = server.input_box.url_input.text.strip()
-						result, message = self.authentication_check(name, url)
-						if not result:
-							self.display_message(screen, message)
-							return False
-						result, message = self.branch_check(name, branch)
-						if not result:
-							self.display_message(screen, message)
-							return False
-					requests = []
+						tmp = [self.display_message(screen, '%s authentication check'%name),
+							   self.authentication_check(name, url),
+							   self.display_message(screen, '%s branch check'%branch),
+							   self.branch_check(name, branch)]
+						requests.extend(tmp)
+
 					for server in checked_servers:
+						requests.append(self.display_message(screen, '%s deployment...'%name))
 						name = server.input_box.name_input.text.strip()
 						url = server.input_box.url_input.text.strip()
 						tmp_call = self.deploy_server(self.username,
 													  self.password,
 													  name, url, branch)
 						requests.append(tmp_call)
-					self.deploymentComplition(requests)
+					self.deploymentComplition(requests, output=True)
+
 
 class DeploymentApp(App):
 	def __init__(self, *args, **kwargs):
