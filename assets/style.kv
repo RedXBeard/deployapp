@@ -150,13 +150,13 @@
 <Deployment>
 	action_screen: action_screen
 	settings_screen: settings_screen
+	deploy_screen: deploy_screen
 
 	Screen:
 		id: action_screen
 		name: 'action_screen'
 
 		server_items: server_items
-		info: info
 		branch: branch
 
 		FloatLayout:
@@ -227,14 +227,8 @@
                         pos: self.pos
                 text: "[b]DEPLOY[/b]"
                 pos: 10, 10
-                size: 100, 30
-                on_press: root.deploy()
-
-            Label:
-                id: info
-            	size: 270, 30
-            	pos: 120, 10
-            	text_size: self.width, None
+                size: 380, 30
+                on_press: root.collect_deploy_data();root.switch_screen('deploy_screen', side='down');root.deploy()
 
     Screen:
 		id: settings_screen
@@ -323,3 +317,33 @@
     			pos: 90, 10
 
     			adapter: ListAdapter(data=root.servers, cls=Factory.SettingsServerItem, args_converter=root.servers_to_items)
+    Screen:
+    	id: deploy_screen
+    	name: "deploy_screen"
+
+    	info: info
+
+    	Label:
+    		text: "[color=404248]Processing...[/color]"
+    		pos: 30, 200
+    		size: 340, 20
+    		text_size: self.width, None
+
+    	Label:
+            canvas.before:
+                Color:
+                    rgba: get_color_from_hex('97BE0D')
+                Rectangle:
+                    size: root.progress, self.size[1]
+                    pos: self.pos
+                Color:
+                    rgba: get_color_from_hex('404248')
+                Rectangle:
+                    size: self.size[0]-root.progress, self.size[1]
+                    pos: self.pos[0]+root.progress, self.pos[1]
+            id: info
+    		size: 340, 40
+    		pos: 30, 150
+    		padding_x: 10
+    		text_size: self.width, None
+

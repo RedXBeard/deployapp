@@ -4,11 +4,13 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.screenmanager import SlideTransition
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.config import Config
 from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.utils import get_color_from_hex
-from kivy.properties import ListProperty, StringProperty
+from kivy.properties import (ListProperty, StringProperty, 
+							 NumericProperty, BooleanProperty)
 from config import PROJECT_PATH, DB, CALLS, run_syscall
 import os
 
@@ -32,6 +34,9 @@ def findparent(curclass, targetclass):
 		reqclass = reqclass.parent
 	return reqclass
 
+
+class CustomButton(Button):
+	pass
 
 class ActionServerItem(BoxLayout):
 	name = StringProperty("")
@@ -86,6 +91,12 @@ class Deployment(ScreenManager):
 	servers = ListProperty([])
 	username = StringProperty("")
 	password = StringProperty("")
+
+	branch = StringProperty("")
+	checked_servers = ListProperty([])
+	progress = NumericProperty(0)
+	unit_progress = NumericProperty(0)
+	error_occured = NumericProperty(0)
 
 	def __init__(self, *args, **kwargs):
 		super(Deployment, self).__init__(*args, **kwargs)
@@ -200,6 +211,13 @@ class Deployment(ScreenManager):
 		return inner_deploy_server
 
 
+	def reset_progess(self):
+		def inner_reset_progress(process_count):
+			self.unit_progress = 340 / process_count
+			self.progress = 0
+			self.error_occured = 0
+		return inner_reset_progress
+
 	def deploymentComplition(self, requests, output=False):
 		if requests:
 			if not output:
@@ -211,43 +229,81 @@ class Deployment(ScreenManager):
 				result, message = call()
 				if not result:
 					self.display_message(self.current_screen, message)()
+					self.error_occured = 1
+					
+					from kivy.graphics import Canvas, Color, Rectangle
+
+					cross_img = Image(source="assets/cross2.png", size=(20, 20), pos=(370, 270))
+					cross_but = Button(size=(20, 20), pos=(370, 270), background_color="",
+									   background_down="", background_disabled_down="",
+									   background_disabled_normal="", markup=True, shorten=True,
+									   shorten_from='right')
+					cross_but.add_widget(cross_img)
+					cross_but.canvas.before.add(Color(get_color_from_hex('404248'), mode='rgba'))
+					cross_but.canvas.before.add(Rectangle(size=cross_but.size, pos=cross_but.pos))
+					
+					tryagain_but = Button(size = (100, 30), pos = (150, 90), text = "[b]TRY AGAIN[/b]",
+										  background_color="", background_down="", background_disabled_down="",
+										  background_disabled_normal="", markup=True, shorten=True, shorten_from='right')
+					tryagain_but.canvas.before.add(Color(get_color_from_hex('FFCC00'), mode='rgba'))
+					tryagain_but.canvas.before.add(Rectangle(size=tryagain_but.size, pos=tryagain_but.pos))
+
+					self.current_screen.add_widget(cross_but)
+					self.current_screen.add_widget(tryagain_but)
 					return False
 				else:
 					Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:], output=True), 1)
+					self.progress += self.unit_progress
 		else:
+			self.error_occured = 2
+			ok_but = Button(size = (100, 30), pos = (150, 90), text = "[b]COMPLETE[/b]", 
+				            background_color="", background_down="", background_disabled_down="",
+							background_disabled_normal="", markup=True, shorten=True, shorten_from='right')
+
+			with ok_but.canvas.before:
+				Color(get_color_from_hex('97BE0D'))
+				ok_but.rect = Rectangle(size=ok_but.size, pos=ok_but.pos)
+
+			self.current_screen.add_widget(ok_but)
 			return True
 
+
+	def collect_deploy_data(self):
+		screen = self.current_screen
+		servers = screen.server_items.children[0].children[0].children
+		self.branch = screen.branch.text.strip()
+		self.checked_servers = filter(lambda x: x.checkbox.children, servers)
+
 	def deploy(self):
-		if self.current == "action_screen":
+		if self.current == "deploy_screen":
 			screen = self.current_screen
-			branch = screen.branch.text.strip()
-			if not branch:
+			if not self.branch:
 				screen.info.text = u"'branch' is empty!"
 			else:
-				servers = screen.server_items.children[0].children[0].children
-				checked_servers = filter(lambda x: x.checkbox.children, servers)
-				if not checked_servers:
+				if not self.checked_servers:
 					self.display_message(screen, u"at least check one server please!")()
 				else:
 					result = True
 					requests = []
-					for server in checked_servers:
+					for server in self.checked_servers:
 						name = server.input_box.name_input.text.strip()
 						url = server.input_box.url_input.text.strip()
 						tmp = [self.display_message(screen, '%s authentication check'%name),
 							   self.authentication_check(name, url),
-							   self.display_message(screen, '%s branch check'%branch),
-							   self.branch_check(name, branch)]
+							   self.display_message(screen, '%s branch check'%self.branch),
+							   self.branch_check(name, self.branch)]
 						requests.extend(tmp)
 
-					for server in checked_servers:
-						requests.append(self.display_message(screen, '%s deployment...'%name))
+					for server in self.checked_servers:
 						name = server.input_box.name_input.text.strip()
 						url = server.input_box.url_input.text.strip()
+						requests.append(self.display_message(screen, '%s deployment...'%name))
 						tmp_call = self.deploy_server(self.username,
 													  self.password,
-													  name, url, branch)
-						requests.append(tmp_call)
+													  name, url, 
+													  self.branch)
+						#requests.append(tmp_call)
+					self.reset_progess()(len(requests))
 					self.deploymentComplition(requests, output=True)
 
 
