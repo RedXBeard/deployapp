@@ -4,7 +4,6 @@
 #:import KIVY_VERSION config.KIVY_VERSION
 
 <Button>
-	background_color: ""
 	background_down: ""
 	background_disabled_down: ""
 	background_disabled_normal: ""
@@ -35,17 +34,18 @@
 		orientation: 'horizontal'
 		size: 300, 20
 		id: input_box
-		
+
 		name_input: name
 		url_input: url
 
 		Button:
 			canvas.before:
-                Color:
-                    rgba: get_color_from_hex('E2007A')
-                Rectangle:
-                    size: self.size
-                    pos: self.pos
+				Color:
+					rgba: get_color_from_hex('E2007A')
+				Rectangle:
+					size: self.size
+					pos: self.pos
+			background_color: get_color_from_hex('E2007A')
 			size: 20, 20
 			font_size: 10
 			on_release: root.delete_server()
@@ -71,7 +71,7 @@
 
 		Label:
 			size: 5, 20
-			
+
 		TextInput:
 			id: url
 			text: root.url
@@ -98,18 +98,19 @@
 		orientation: 'horizontal'
 		size: 300, 20
 		id: input_box
-		
+
 		name_input: name
 		url_input: url
 
 		Button:
 			canvas.before:
-                Color:
-                    rgba: get_color_from_hex('97BE0D')
-                Rectangle:
-                    size: self.size
-                    pos: self.pos
-            id: checkbox
+				Color:
+					rgba: get_color_from_hex('97BE0D')
+				Rectangle:
+					size: self.size
+					pos: self.pos
+			background_color: get_color_from_hex('97BE0D')
+			id: checkbox
 			size: 20, 20
 			font_size: 10
 			on_press: root.pressed_but()
@@ -131,7 +132,7 @@
 
 		Label:
 			size: 5, 20
-			
+
 		TextInput:
 			id: url
 			text: root.url
@@ -163,74 +164,76 @@
 			Label:
 				text: '[b]Deployment[/b]'
 				text_size: self.width, None
-                size: 100, 20
-                pos: 10, 270
+				size: 100, 20
+				pos: 10, 270
 
-            Button:
-            	canvas.before:
-                    Color:
-                        rgba: get_color_from_hex('404248')
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
-                text: 'Settings'
-                size_hint: None, None
-                size: 100, 20
-                pos: 290, 270
-                on_press: root.load_servers();
-                on_release: root.switch_screen('settings_screen', side='left');root.servers_correction_screenbased('settings')
+			Button:
+				canvas.before:
+					Color:
+						rgba: get_color_from_hex('404248')
+					Rectangle:
+						size: self.size
+						pos: self.pos
+				background_color: get_color_from_hex('404248')
+				text: 'Settings'
+				size_hint: None, None
+				size: 100, 20
+				pos: 290, 270
+				on_press: root.load_servers();
+				on_release: root.switch_screen('settings_screen', side='left');root.servers_correction_screenbased('settings')
 
-            Label:
-            	canvas.before:
-                    Color:
-                        rgba: 0,0,0,1
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
-                size: 400, 1
-                pos: 0, 260
+			Label:
+				canvas.before:
+					Color:
+						rgba: 0,0,0,1
+					Rectangle:
+						size: self.size
+						pos: self.pos
+				size: 400, 1
+				pos: 0, 260
 
-            TextInput:
-    			id: branch
-    			size_hint: None, None
-    			pos: 10, 230
-            	size: 100, 20
-    			hint_text: 'Branch..'
-    			multiline: False
-    			padding: 6,2,6,2
-    			background_color: 1, 1, 1, 1
+			TextInput:
+				id: branch
+				size_hint: None, None
+				pos: 10, 230
+				size: 100, 20
+				hint_text: 'Branch..'
+				multiline: False
+				padding: 6,2,6,2
+				background_color: 1, 1, 1, 1
 
-            ListView:
-            	id: server_items
-            	size_hint: None, None
-    			size: 380, 159
-    			pos: 10, 61
+			ListView:
+				id: server_items
+				size_hint: None, None
+				size: 380, 159
+				pos: 10, 61
 
-    			adapter: ListAdapter(data=root.servers, cls=Factory.ActionServerItem, args_converter=root.servers_to_items)
+				adapter: ListAdapter(data=root.servers, cls=Factory.ActionServerItem, args_converter=root.servers_to_items)
 
-    		Label:
-            	canvas.before:
-                    Color:
-                        rgba: 0,0,0,1
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
-                size: 400, 1
-                pos: 0, 50
+		Label:
+			canvas.before:
+				Color:
+					rgba: 0,0,0,1
+				Rectangle:
+					size: self.size
+					pos: self.pos
+			size: 400, 1
+			pos: 0, 50
 
-    		Button:
-    			canvas.before:
-                    Color:
-                        rgba: get_color_from_hex('E2007A')
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
-                text: "[b]DEPLOY[/b]"
-                pos: 10, 10
-                size: 380, 30
-                on_press: root.collect_deploy_data();root.switch_screen('deploy_screen', side='down');root.deploy()
+		Button:
+			canvas.before:
+				Color:
+					rgba: get_color_from_hex('E2007A')
+				Rectangle:
+					size: self.size
+					pos: self.pos
+			background_color: get_color_from_hex('E2007A')
+			text: "[b]DEPLOY[/b]"
+			pos: 10, 10
+			size: 380, 30
+			on_press: root.collect_deploy_data();root.switch_screen('deploy_screen', side='down');root.deploy()
 
-    Screen:
+	Screen:
 		id: settings_screen
 		name: 'settings_screen'
 
@@ -240,110 +243,110 @@
 		FloatLayout:
 			Label:
 				text: '[b]Deployment[/b]'
-            	text_size: self.width, None
-			    size: 100, 20
-                pos: 10, 270
+				text_size: self.width, None
+				size: 100, 20
+				pos: 10, 270
 
-        	Button:
-            	canvas.before:
-                    Color:
-                        rgba: get_color_from_hex('97BE0D')
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
-                text: 'Done'
-                size_hint: None, None
-                size: 100, 20
-                pos: 290, 270
-                on_press: root.load_servers();
-                on_release: root.switch_screen('action_screen', side='right');root.servers_correction_screenbased('action')
+			Button:
+				canvas.before:
+					Color:
+						rgba: get_color_from_hex('97BE0D')
+					Rectangle:
+						size: self.size
+						pos: self.pos
+				background_color: get_color_from_hex('97BE0D')
+				text: 'Done'
+				size_hint: None, None
+				size: 100, 20
+				pos: 290, 270
+				on_press: root.load_servers();
+				on_release: root.switch_screen('action_screen', side='right');root.servers_correction_screenbased('action')
 
-            Label:
-            	canvas.before:
-                    Color:
-                        rgba: 0,0,0,1
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
-                size: 400, 1
-                pos: 0, 260
+			Label:
+				canvas.before:
+					Color:
+						rgba: 0,0,0,1
+					Rectangle:
+						size: self.size
+						pos: self.pos
+				size: 400, 1
+				pos: 0, 260
 
-            Label:
-            	text: "Username"
-            	size: 80, 20
-            	pos: 10, 230
-            	text_size: self.width, None
+			Label:
+				text: "Username"
+				size: 80, 20
+				pos: 10, 230
+				text_size: self.width, None
 
-            TextInput:
-    			id: username
-    			text: root.username
-    			size_hint: None, None
-    			size: 300, 20
-    			pos: 90, 230
-    			hint_text: 'Username'
-    			multiline: False
-    			padding: 6,2,6,2
-    			background_color: 1, 1, 1, 1
-    			on_text_validate: root.uname_pword_update()
+			TextInput:
+				id: username
+				text: root.username
+				size_hint: None, None
+				size: 300, 20
+				pos: 90, 230
+				hint_text: 'Username'
+				multiline: False
+				padding: 6,2,6,2
+				background_color: 1, 1, 1, 1
+				on_text_validate: root.uname_pword_update()
 
-    		Label:
-            	text: "Password"
-            	size: 80, 20
-            	pos: 10, 200
-            	text_size: self.width, None
+			Label:
+				text: "Password"
+				size: 80, 20
+				pos: 10, 200
+				text_size: self.width, None
 
-            TextInput:
-    			id: password
-    			text: root.password
-    			size_hint: None, None
-    			size: 300, 20
-    			pos: 90, 200
-    			hint_text: 'Password'
-    			multiline: False
-    			password: True
-    			padding: 6,2,6,2
-    			background_color: 1, 1, 1, 1
-    			on_text_validate: root.uname_pword_update()
+			TextInput:
+				id: password
+				text: root.password
+				size_hint: None, None
+				size: 300, 20
+				pos: 90, 200
+				hint_text: 'Password'
+				multiline: False
+				password: True
+				padding: 6,2,6,2
+				background_color: 1, 1, 1, 1
+				on_text_validate: root.uname_pword_update()
 
-    		Label:
-    			text: 'Servers'
-    			size: 80, 20
-    			pos: 10, 170
-    			text_size: self.width, None
+			Label:
+				text: 'Servers'
+				size: 80, 20
+				pos: 10, 170
+				text_size: self.width, None
 
-    		ListView:
-    			size_hint: None, None
-    			size: 300, 180
-    			pos: 90, 10
+		ListView:
+			size_hint: None, None
+			size: 300, 180
+			pos: 90, 10
 
-    			adapter: ListAdapter(data=root.servers, cls=Factory.SettingsServerItem, args_converter=root.servers_to_items)
-    Screen:
-    	id: deploy_screen
-    	name: "deploy_screen"
+			adapter: ListAdapter(data=root.servers, cls=Factory.SettingsServerItem, args_converter=root.servers_to_items)
+	Screen:
+		id: deploy_screen
+		name: "deploy_screen"
 
-    	info: info
+		info: info
 
-    	Label:
-    		text: "[color=404248]Processing...[/color]"
-    		pos: 30, 200
-    		size: 340, 20
-    		text_size: self.width, None
+		Label:
+			text: "[color=404248]Processing...[/color]"
+			pos: 30, 200
+			size: 340, 20
+			text_size: self.width, None
 
-    	Label:
-            canvas.before:
-                Color:
-                    rgba: get_color_from_hex('97BE0D')
-                Rectangle:
-                    size: root.progress, self.size[1]
-                    pos: self.pos
-                Color:
-                    rgba: get_color_from_hex('404248')
-                Rectangle:
-                    size: self.size[0]-root.progress, self.size[1]
-                    pos: self.pos[0]+root.progress, self.pos[1]
-            id: info
-    		size: 340, 40
-    		pos: 30, 150
-    		padding_x: 10
-    		text_size: self.width, None
-
+		Label:
+			canvas.before:
+				Color:
+					rgba: get_color_from_hex('97BE0D')
+				Rectangle:
+					size: root.progress, self.size[1]
+					pos: self.pos
+				Color:
+					rgba: get_color_from_hex('404248')
+				Rectangle:
+					size: self.size[0]-root.progress, self.size[1]
+					pos: self.pos[0]+root.progress, self.pos[1]
+			id: info
+			size: 340, 40
+			pos: 30, 150
+			padding_x: 10
+			text_size: self.width, None

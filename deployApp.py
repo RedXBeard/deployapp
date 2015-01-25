@@ -9,8 +9,9 @@ from kivy.config import Config
 from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.utils import get_color_from_hex
-from kivy.properties import (ListProperty, StringProperty, 
+from kivy.properties import (ListProperty, StringProperty,
 							 NumericProperty, BooleanProperty)
+from kivy.graphics import Canvas, Color, Rectangle
 from config import PROJECT_PATH, DB, CALLS, run_syscall
 import os
 
@@ -35,12 +36,10 @@ def findparent(curclass, targetclass):
 	return reqclass
 
 
-class CustomButton(Button):
-	pass
-
 class ActionServerItem(BoxLayout):
 	name = StringProperty("")
 	url = StringProperty("")
+
 
 	def pressed_but(self):
 		images = self.checkbox.children
@@ -55,11 +54,12 @@ class ActionServerItem(BoxLayout):
 			self.checkbox.add_widget(image)
 			self.input_box.name_input.background_color = get_color_from_hex('eeeeee')
 			self.input_box.url_input.background_color = get_color_from_hex('eeeeee')
-			
+
 
 class SettingsServerItem(BoxLayout):
 	name = StringProperty("")
 	url = StringProperty("")
+
 
 	def add_server(self, *args):
 		name = self.input_box.name_input.text.strip()
@@ -72,6 +72,7 @@ class SettingsServerItem(BoxLayout):
 			root = findparent(self, Deployment)
 			root.load_servers()
 			root.servers_correction_screenbased('settings')
+
 
 	def delete_server(self, *args):
 		name = self.input_box.name_input.text.strip()
@@ -98,23 +99,31 @@ class Deployment(ScreenManager):
 	unit_progress = NumericProperty(0)
 	error_occured = NumericProperty(0)
 
+
 	def __init__(self, *args, **kwargs):
 		super(Deployment, self).__init__(*args, **kwargs)
+		self.load_servers()
+		self.servers_correction_screenbased('action')
 		self.username = DB.store_get('username')
 		self.password = DB.store_get('password')
+
 
 	def load_servers(self):
 		server_datas = DB.store_get('servers')
 		self.servers = []
 		for server in server_datas:
-			self.servers.append({'name':server['name'], 
+			self.servers.append({'name':server['name'],
 								 'url':server['url']})
 		self.servers.append({'name':"", 'url':""})
 
 
-	def switch_screen(self, screen, side='left'):
+	def switch_screen(self, screen, side='up'):
 		self.transition = SlideTransition(direction=side)
 		self.current = screen
+
+
+	def fast_switch_screen(self, obj, screen='action_screen', side='up'):
+		self.switch_screen(screen, side)
 
 
 	def uname_pword_update(self):
@@ -128,6 +137,7 @@ class Deployment(ScreenManager):
 			self.username = username
 			self.password = password
 
+
 	def servers_correction_screenbased(self, screen):
 		emptyslot = filter(lambda x: x['name'].strip() == '' or \
 									 x['url'].strip() == '', self.servers)
@@ -136,7 +146,7 @@ class Deployment(ScreenManager):
 				self.servers.pop(self.servers.index(slot))
 
 		if screen == 'action':
-			pass		
+			pass
 
 		if screen == 'settings':
 			self.servers.append({'name': "", 'url': ""})
@@ -155,7 +165,6 @@ class Deployment(ScreenManager):
 			os.chdir('%(path)s'%{'path': PROJECT_PATH})
 			out, err = run_syscall('fab authentication_check:%(username)s,%(password)s,%(server)s'%\
 								{'username': self.username, 'password':self.password, 'server': server})
-			
 			try:
 				result = out.split('DEPLOYMENT:')
 				result = result[1].split(":")[0].strip()
@@ -164,7 +173,6 @@ class Deployment(ScreenManager):
 				result = False
 			if not result:
 				message = u"%s authentication failed"%name
-
 			return result, message
 		return inner_authentication_check
 
@@ -179,7 +187,7 @@ class Deployment(ScreenManager):
 			if out.find('tar: Exiting with failure status due to previous errors') != -1 or \
 				err.find('tar: Exiting with failure status due to previous errors') != -1:
 				result = False
-				message = u"Branch not found for %s"%name 
+				message = u"Branch not found for %s"%name
 			else:
 				out, err = run_syscall("rm -rf %s"%branch)
 				result = True
@@ -218,6 +226,7 @@ class Deployment(ScreenManager):
 			self.error_occured = 0
 		return inner_reset_progress
 
+
 	def deploymentComplition(self, requests, output=False):
 		if requests:
 			if not output:
@@ -230,23 +239,19 @@ class Deployment(ScreenManager):
 				if not result:
 					self.display_message(self.current_screen, message)()
 					self.error_occured = 1
-					
-					from kivy.graphics import Canvas, Color, Rectangle
 
 					cross_img = Image(source="assets/cross2.png", size=(20, 20), pos=(370, 270))
-					cross_but = Button(size=(20, 20), pos=(370, 270), background_color="",
-									   background_down="", background_disabled_down="",
-									   background_disabled_normal="", markup=True, shorten=True,
-									   shorten_from='right')
+					cross_but = Button(size=(20, 20), pos=(370, 270), background_color=get_color_from_hex('404248'))
 					cross_but.add_widget(cross_img)
-					cross_but.canvas.before.add(Color(get_color_from_hex('404248'), mode='rgba'))
-					cross_but.canvas.before.add(Rectangle(size=cross_but.size, pos=cross_but.pos))
-					
+					cross_but.fast_bind('on_press', self.fast_switch_screen, screen='action_screen', side='up')
+					#cross_but.canvas.before.add(Color(get_color_from_hex('404248'), mode='rgba'))
+					#cross_but.canvas.before.add(Rectangle(size=cross_but.size, pos=cross_but.pos))
+
 					tryagain_but = Button(size = (100, 30), pos = (150, 90), text = "[b]TRY AGAIN[/b]",
-										  background_color="", background_down="", background_disabled_down="",
-										  background_disabled_normal="", markup=True, shorten=True, shorten_from='right')
-					tryagain_but.canvas.before.add(Color(get_color_from_hex('FFCC00'), mode='rgba'))
-					tryagain_but.canvas.before.add(Rectangle(size=tryagain_but.size, pos=tryagain_but.pos))
+														   background_color=get_color_from_hex('FFCC00'))
+					tryagain_but.fast_bind('on_press', self.fast_switch_screen, screen='action_screen', side='up')
+					#tryagain_but.canvas.before.add(Color(get_color_from_hex('FFCC00'), mode='rgba'))
+					#tryagain_but.canvas.before.add(Rectangle(size=tryagain_but.size, pos=tryagain_but.pos))
 
 					self.current_screen.add_widget(cross_but)
 					self.current_screen.add_widget(tryagain_but)
@@ -256,15 +261,13 @@ class Deployment(ScreenManager):
 					self.progress += self.unit_progress
 		else:
 			self.error_occured = 2
-			ok_but = Button(size = (100, 30), pos = (150, 90), text = "[b]COMPLETE[/b]", 
-				            background_color="", background_down="", background_disabled_down="",
-							background_disabled_normal="", markup=True, shorten=True, shorten_from='right')
-
-			with ok_but.canvas.before:
-				Color(get_color_from_hex('97BE0D'))
-				ok_but.rect = Rectangle(size=ok_but.size, pos=ok_but.pos)
-
+			ok_but = Button(size = (100, 30), pos = (150, 90), text = "[b]COMPLETE[/b]",
+										background_color=get_color_from_hex('97BE0D'))
+			#ok_but.canvas.before.add(Color(get_color_from_hex('97BE0D')))
+			#ok_but.canvas.before.add(Rectangle(size=ok_but.size, pos=ok_but.pos))
+			ok_but.fast_bind('on_press', self.fast_switch_screen, screen='action_screen', side='up')
 			self.current_screen.add_widget(ok_but)
+			self.progress = 340
 			return True
 
 
@@ -300,7 +303,7 @@ class Deployment(ScreenManager):
 						requests.append(self.display_message(screen, '%s deployment...'%name))
 						tmp_call = self.deploy_server(self.username,
 													  self.password,
-													  name, url, 
+													  name, url,
 													  self.branch)
 						#requests.append(tmp_call)
 					self.reset_progess()(len(requests))
@@ -315,8 +318,9 @@ class DeploymentApp(App):
 
 	def build(self):
 		layout = Deployment()
-		layout.load_servers()
-		layout.servers_correction_screenbased('action')
+#		layout.switch_screen('action_screen', 'up')
+#		layout.load_servers()
+#		layout.servers_correction_screenbased('action')
 		return layout
 
 
