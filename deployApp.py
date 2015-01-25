@@ -36,6 +36,18 @@ def findparent(curclass, targetclass):
 	return reqclass
 
 
+class TryAgainButton(Button):
+	pass
+
+
+class CrossButton(Button):
+	pass
+
+
+class CompleteButton(Button):
+	pass
+
+
 class ActionServerItem(BoxLayout):
 	name = StringProperty("")
 	url = StringProperty("")
@@ -97,7 +109,6 @@ class Deployment(ScreenManager):
 	checked_servers = ListProperty([])
 	progress = NumericProperty(0)
 	unit_progress = NumericProperty(0)
-	error_occured = NumericProperty(0)
 
 
 	def __init__(self, *args, **kwargs):
@@ -223,7 +234,6 @@ class Deployment(ScreenManager):
 		def inner_reset_progress(process_count):
 			self.unit_progress = 340 / process_count
 			self.progress = 0
-			self.error_occured = 0
 		return inner_reset_progress
 
 
@@ -236,36 +246,17 @@ class Deployment(ScreenManager):
 			else:
 				call = requests[0]
 				result, message = call()
-				if not result:
+				if not result and False:
 					self.display_message(self.current_screen, message)()
-					self.error_occured = 1
-
-					cross_img = Image(source="assets/cross2.png", size=(20, 20), pos=(370, 270))
-					cross_but = Button(size=(20, 20), pos=(370, 270), background_color=get_color_from_hex('404248'))
-					cross_but.add_widget(cross_img)
-					cross_but.fast_bind('on_press', self.fast_switch_screen, screen='action_screen', side='up')
-					#cross_but.canvas.before.add(Color(get_color_from_hex('404248'), mode='rgba'))
-					#cross_but.canvas.before.add(Rectangle(size=cross_but.size, pos=cross_but.pos))
-
-					tryagain_but = Button(size = (100, 30), pos = (150, 90), text = "[b]TRY AGAIN[/b]",
-														   background_color=get_color_from_hex('FFCC00'))
-					tryagain_but.fast_bind('on_press', self.fast_switch_screen, screen='action_screen', side='up')
-					#tryagain_but.canvas.before.add(Color(get_color_from_hex('FFCC00'), mode='rgba'))
-					#tryagain_but.canvas.before.add(Rectangle(size=tryagain_but.size, pos=tryagain_but.pos))
-
-					self.current_screen.add_widget(cross_but)
-					self.current_screen.add_widget(tryagain_but)
+					self.display_error_buts_deployment()
 					return False
 				else:
 					Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:], output=True), 1)
 					self.progress += self.unit_progress
 		else:
-			self.error_occured = 2
-			ok_but = Button(size = (100, 30), pos = (150, 90), text = "[b]COMPLETE[/b]",
+			ok_but = CompleteButton(size = (100, 30), pos = (150, 90), text = "[b]COMPLETE[/b]",
 										background_color=get_color_from_hex('97BE0D'))
-			#ok_but.canvas.before.add(Color(get_color_from_hex('97BE0D')))
-			#ok_but.canvas.before.add(Rectangle(size=ok_but.size, pos=ok_but.pos))
-			ok_but.fast_bind('on_press', self.fast_switch_screen, screen='action_screen', side='up')
+			ok_but.fast_bind('on_release', self.fast_switch_screen, screen='action_screen', side='up')
 			self.current_screen.add_widget(ok_but)
 			self.progress = 340
 			return True
@@ -277,14 +268,43 @@ class Deployment(ScreenManager):
 		self.branch = screen.branch.text.strip()
 		self.checked_servers = filter(lambda x: x.checkbox.children, servers)
 
+
+	def reset_screen(self):
+		if self.current == 'deploy_screen':
+			children = self.current_screen.children
+			buttons = []
+			for child in children:
+				if str(child.__class__).find('Button') != -1:
+					buttons.append(child)
+			for button in buttons:
+				for child in button.children:
+					button.remove_widget(child)
+				self.current_screen.remove_widget(button)
+
+
+	def display_error_buts_deployment(self):
+		cross_img = Image(source="assets/cross2.png", size=(20, 20), pos=(370, 270))
+		cross_but = CrossButton(size=(20, 20), pos=(370, 270), background_color=get_color_from_hex('404248'))
+		cross_but.add_widget(cross_img)
+		cross_but.fast_bind('on_release', self.fast_switch_screen, screen='action_screen', side='up')
+
+		tryagain_but = TryAgainButton(size = (100, 30), pos = (150, 90), text = "[b]TRY AGAIN[/b]",
+											   background_color=get_color_from_hex('FFCC00'))
+		tryagain_but.fast_bind('on_release', self.fast_switch_screen, screen='action_screen', side='up')
+		self.current_screen.add_widget(cross_but)
+		self.current_screen.add_widget(tryagain_but)
+
 	def deploy(self):
 		if self.current == "deploy_screen":
+			self.reset_screen()
 			screen = self.current_screen
 			if not self.branch:
-				screen.info.text = u"'branch' is empty!"
+				self.display_message(screen, u"'branch' is empty!")()
+				self.display_error_buts_deployment()
 			else:
 				if not self.checked_servers:
 					self.display_message(screen, u"at least check one server please!")()
+					self.display_error_buts_deployment()
 				else:
 					result = True
 					requests = []
@@ -306,6 +326,7 @@ class Deployment(ScreenManager):
 													  name, url,
 													  self.branch)
 						#requests.append(tmp_call)
+					requests.append(self.display_message(screen, "Deployment complete for branch; '%s'"%self.branch))
 					self.reset_progess()(len(requests))
 					self.deploymentComplition(requests, output=True)
 

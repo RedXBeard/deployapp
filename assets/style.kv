@@ -11,6 +11,48 @@
 	shorten: True
 	shorten_from: 'right'
 
+<CrossButton>
+	canvas.before:
+		Color:
+			rgba: get_color_from_hex('404248')
+		Rectangle:
+			size: self.size
+			pos: self.pos
+	background_down: ""
+	background_disabled_down: ""
+	background_disabled_normal: ""
+	markup: True
+	shorten: True
+	shorten_from: 'right'
+
+<TryAgainButton>
+	canvas.before:
+		Color:
+			rgba: get_color_from_hex('FFCC00')
+		Rectangle:
+			size: self.size
+			pos: self.pos
+	background_down: ""
+	background_disabled_down: ""
+	background_disabled_normal: ""
+	markup: True
+	shorten: True
+	shorten_from: 'right'
+
+<CompleteButton>
+	canvas.before:
+		Color:
+			rgba: get_color_from_hex('97BE0D')
+		Rectangle:
+			size: self.size
+			pos: self.pos
+	background_down: ""
+	background_disabled_down: ""
+	background_disabled_normal: ""
+	markup: True
+	shorten: True
+	shorten_from: 'right'
+
 <Label>
 	markup: True
 	shorten: True
