@@ -4,45 +4,9 @@
 #:import KIVY_VERSION config.KIVY_VERSION
 
 <Button>
-	background_down: ""
-	background_disabled_down: ""
-	background_disabled_normal: ""
-	markup: True
-	shorten: True
-	shorten_from: 'right'
-
-<CrossButton>
 	canvas.before:
 		Color:
-			rgba: get_color_from_hex('404248')
-		Rectangle:
-			size: self.size
-			pos: self.pos
-	background_down: ""
-	background_disabled_down: ""
-	background_disabled_normal: ""
-	markup: True
-	shorten: True
-	shorten_from: 'right'
-
-<TryAgainButton>
-	canvas.before:
-		Color:
-			rgba: get_color_from_hex('FFCC00')
-		Rectangle:
-			size: self.size
-			pos: self.pos
-	background_down: ""
-	background_disabled_down: ""
-	background_disabled_normal: ""
-	markup: True
-	shorten: True
-	shorten_from: 'right'
-
-<CompleteButton>
-	canvas.before:
-		Color:
-			rgba: get_color_from_hex('97BE0D')
+			rgba: self.background_color
 		Rectangle:
 			size: self.size
 			pos: self.pos
@@ -81,12 +45,6 @@
 		url_input: url
 
 		Button:
-			canvas.before:
-				Color:
-					rgba: get_color_from_hex('E2007A')
-				Rectangle:
-					size: self.size
-					pos: self.pos
 			background_color: get_color_from_hex('E2007A')
 			size: 20, 20
 			font_size: 10
@@ -145,12 +103,6 @@
 		url_input: url
 
 		Button:
-			canvas.before:
-				Color:
-					rgba: get_color_from_hex('97BE0D')
-				Rectangle:
-					size: self.size
-					pos: self.pos
 			background_color: get_color_from_hex('97BE0D')
 			id: checkbox
 			size: 20, 20
@@ -210,12 +162,6 @@
 				pos: 10, 270
 
 			Button:
-				canvas.before:
-					Color:
-						rgba: get_color_from_hex('404248')
-					Rectangle:
-						size: self.size
-						pos: self.pos
 				background_color: get_color_from_hex('404248')
 				text: 'Settings'
 				size_hint: None, None
@@ -263,12 +209,6 @@
 			pos: 0, 50
 
 		Button:
-			canvas.before:
-				Color:
-					rgba: get_color_from_hex('E2007A')
-				Rectangle:
-					size: self.size
-					pos: self.pos
 			background_color: get_color_from_hex('E2007A')
 			text: "[b]DEPLOY[/b]"
 			pos: 10, 10
@@ -290,12 +230,6 @@
 				pos: 10, 270
 
 			Button:
-				canvas.before:
-					Color:
-						rgba: get_color_from_hex('97BE0D')
-					Rectangle:
-						size: self.size
-						pos: self.pos
 				background_color: get_color_from_hex('97BE0D')
 				text: 'Done'
 				size_hint: None, None

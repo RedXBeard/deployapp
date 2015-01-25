@@ -36,22 +36,9 @@ def findparent(curclass, targetclass):
 	return reqclass
 
 
-class TryAgainButton(Button):
-	pass
-
-
-class CrossButton(Button):
-	pass
-
-
-class CompleteButton(Button):
-	pass
-
-
 class ActionServerItem(BoxLayout):
 	name = StringProperty("")
 	url = StringProperty("")
-
 
 	def pressed_but(self):
 		images = self.checkbox.children
@@ -254,7 +241,7 @@ class Deployment(ScreenManager):
 					Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:], output=True), 1)
 					self.progress += self.unit_progress
 		else:
-			ok_but = CompleteButton(size = (100, 30), pos = (150, 90), text = "[b]COMPLETE[/b]",
+			ok_but = Button(size = (100, 30), pos = (150, 90), text = "[b]COMPLETE[/b]",
 										background_color=get_color_from_hex('97BE0D'))
 			ok_but.fast_bind('on_release', self.fast_switch_screen, screen='action_screen', side='up')
 			self.current_screen.add_widget(ok_but)
@@ -284,11 +271,11 @@ class Deployment(ScreenManager):
 
 	def display_error_buts_deployment(self):
 		cross_img = Image(source="assets/cross2.png", size=(20, 20), pos=(370, 270))
-		cross_but = CrossButton(size=(20, 20), pos=(370, 270), background_color=get_color_from_hex('404248'))
+		cross_but = Button(size=(20, 20), pos=(370, 270), background_color=get_color_from_hex('404248'))
 		cross_but.add_widget(cross_img)
 		cross_but.fast_bind('on_release', self.fast_switch_screen, screen='action_screen', side='up')
 
-		tryagain_but = TryAgainButton(size = (100, 30), pos = (150, 90), text = "[b]TRY AGAIN[/b]",
+		tryagain_but = Button(size = (100, 30), pos = (150, 90), text = "[b]TRY AGAIN[/b]",
 											   background_color=get_color_from_hex('FFCC00'))
 		tryagain_but.fast_bind('on_release', self.fast_switch_screen, screen='action_screen', side='up')
 		self.current_screen.add_widget(cross_but)
