@@ -233,7 +233,7 @@ class Deployment(ScreenManager):
 			else:
 				call = requests[0]
 				result, message = call()
-				if not result and False:
+				if not result:
 					self.display_message(self.current_screen, message)()
 					self.display_error_buts_deployment()
 					return False
