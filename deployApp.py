@@ -332,6 +332,7 @@ class Deployment(ScreenManager):
 					for server in self.checked_servers:
 						name = server.input_box.name_input.text.strip()
 						url = server.input_box.url_input.text.strip()
+						cmd = server.input_box.cmd_input.text.strip()
 						requests.append(self.display_message(screen, '%s deployment...'%name))
 						tmp_call = self.deploy_server(self.username,
 													  self.password,

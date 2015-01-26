@@ -28,7 +28,7 @@ def command_check(username, password, server, command):
 		sudo('which %s'%command)
 
 
-def deploy(brnach, username, password, server, sys_call):
+def deploy(branch, username, password, server, sys_call):
 	env.host_string = server
 	env.user = username
 	env.password = password
