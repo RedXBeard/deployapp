@@ -46,6 +46,8 @@
 		cmd_input: cmd
 
 		Button:
+			id: del_but
+			on_parent: if not root.name: root.input_box.remove_widget(del_but)
 			background_color: get_color_from_hex('E2007A')
 			size: 20, 20
 			font_size: 10
@@ -54,6 +56,11 @@
 				source: "assets/cross2.png"
 				pos: self.parent.pos
 				size: self.parent.size
+
+		Label:
+			id: del_space
+			on_parent: if root.name: root.input_box.remove_widget(del_space)
+			size: 20, 20
 
 		Label:
 			size: 5, 20
