@@ -20,29 +20,18 @@ def authentication_check(username, password, server):
 		print "DEPLOYMENT:%s:ENDDEPLOYMENT"%result
 
 
-def deploy_zizigo(branch, username, password, server):
+def command_check(username, password, server, command):
+	with settings(warn_only=True, abort_on_prompts=True):
+		env.host_string = server
+		env.user = username
+		env.password = password
+		sudo('which %s'%command)
+
+
+def deploy(brnach, username, password, server, sys_call):
 	env.host_string = server
 	env.user = username
 	env.password = password
-	sudo('deploy_fila2 %s'%branch)
+	sudo('%s %s'%(sys_call, branch))
 
 
-def deploy_misspera(branch, username, password, server):
-	env.host_string = server
-	env.user = username
-	env.password = password
-	sudo('deploy_cosmo2 %s'%branch)
-
-
-def deploy_enmoda(branch, username, password, server):
-	env.host_string = server
-	env.user = username
-	env.password = password
-	sudo('deploy_caracas2 %s'%branch)
-
-
-def deploy_all(branch, username, password, server):
-	env.host_string = server
-	env.user = username
-	env.password = password
-	sudo('deploy2_all %s'%branch)

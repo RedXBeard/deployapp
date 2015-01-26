@@ -44,7 +44,3 @@ if not DB.store_exists('username'):
 if not DB.store_exists('password'):
 	DB.store_put('password', "")
 	DB.store_sync()
-
-CALLS = dict(zizigo="deploy_zizigo",
-             misspera="deploy_misspera",
-             enmoda="deploy_enmoda")

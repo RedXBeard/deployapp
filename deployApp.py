@@ -12,7 +12,7 @@ from kivy.utils import get_color_from_hex
 from kivy.properties import (ListProperty, StringProperty,
 							 NumericProperty, BooleanProperty)
 from kivy.graphics import Canvas, Color, Rectangle
-from config import PROJECT_PATH, DB, CALLS, run_syscall
+from config import PROJECT_PATH, DB, run_syscall
 import os
 
 
@@ -39,6 +39,8 @@ def findparent(curclass, targetclass):
 class ActionServerItem(BoxLayout):
 	name = StringProperty("")
 	url = StringProperty("")
+	cmd = StringProperty("")
+
 
 	def pressed_but(self):
 		images = self.checkbox.children
@@ -58,14 +60,16 @@ class ActionServerItem(BoxLayout):
 class SettingsServerItem(BoxLayout):
 	name = StringProperty("")
 	url = StringProperty("")
+	cmd = StringProperty("")
 
 
 	def add_server(self, *args):
 		name = self.input_box.name_input.text.strip()
 		url = self.input_box.url_input.text.strip()
-		if name and url:
+		cmd = self.input_box.cmd_input.text.strip()
+		if name and url and cmd:
 			servers = DB.store_get('servers')
-			servers.append({'name': name, 'url': url})
+			servers.append({'name': name, 'url': url, 'cmd': cmd})
 			DB.store_put('servers', servers)
 			DB.store_sync()
 			root = findparent(self, Deployment)
@@ -76,7 +80,8 @@ class SettingsServerItem(BoxLayout):
 	def delete_server(self, *args):
 		name = self.input_box.name_input.text.strip()
 		url = self.input_box.url_input.text.strip()
-		tmp = {'name':name, 'url':url}
+		cmd = self.input_box.cmd_input.text.strip()
+		tmp = {'name':name, 'url':url, 'cmd':cmd}
 		servers = DB.store_get('servers')
 		if filter(lambda x: x == tmp, servers):
 			servers.pop(servers.index(tmp))
@@ -110,9 +115,11 @@ class Deployment(ScreenManager):
 		server_datas = DB.store_get('servers')
 		self.servers = []
 		for server in server_datas:
-			self.servers.append({'name':server['name'],
-								 'url':server['url']})
-		self.servers.append({'name':"", 'url':""})
+			name = 'name' in server and server['name'] or ''
+			url = 'url' in server and server['url'] or ''
+			cmd = 'cmd' in server and server['cmd'] or ''
+			self.servers.append({'name':name, 'url':url, 'cmd':cmd})
+		self.servers.append({'name':'', 'url':'', 'cmd':''})
 
 
 	def switch_screen(self, screen, side='up'):
@@ -138,7 +145,8 @@ class Deployment(ScreenManager):
 
 	def servers_correction_screenbased(self, screen):
 		emptyslot = filter(lambda x: x['name'].strip() == '' or \
-									 x['url'].strip() == '', self.servers)
+									 x['url'].strip() == '' or \
+									 x['cmd'].strip() == '', self.servers)
 		if emptyslot:
 			for slot in emptyslot:
 				self.servers.pop(self.servers.index(slot))
@@ -147,13 +155,14 @@ class Deployment(ScreenManager):
 			pass
 
 		if screen == 'settings':
-			self.servers.append({'name': "", 'url': ""})
+			self.servers.append({'name':"", 'url':"", 'cmd':""})
 
 
 	def servers_to_items(self, raw_index, item):
 		return {
 			'name': item['name'],
-			'url': item['url']
+			'url': item['url'],
+			'cmd': item['cmd']
 		}
 
 
@@ -194,6 +203,22 @@ class Deployment(ScreenManager):
 		return inner_branch_check
 
 
+	def command_check(self, server, command):
+		def inner_command_check():
+			out, err = run_syscall('fab command_check:%(username)s,%(password)s,%(server)s,%(command)s'%\
+								{'username': self.username, 'password':self.password, 
+								 'server': server, 'command': command})
+			if err.strip():
+				return False, '%s command not found on server'%command
+			else:
+				out = out.replace('which %s'%command, ' ')
+				if out.find(command) != -1:
+					return True, ""
+				else:
+					return False, '%s command not found on server'%command
+		return inner_command_check
+
+
 	def display_message(self, screen, message):
 		def inner_display_message():
 			screen.info.text = message
@@ -201,19 +226,16 @@ class Deployment(ScreenManager):
 		return inner_display_message
 
 
-	def deploy_server(self, username, password, name, url, branch):
+	def deploy_server(self, username, password, name, url, command, branch):
 		def inner_deploy_server():
-			if name not in CALLS:
-				return False, u"Required call cannot be found"
-			else:
-				out, err = run_syscall("fab %(call)s:%(branch)s,%(username)s,%(password)s,%(server)s"%\
-									{'call': CALLS['%s'%name],
-									 'branch': branch,
-									 'username': username,
-									 'password': password,
-									 'server': url})
-				self.display_message(self.current_screen, u'%s --> %s'%(branch, name))()
-				return True, ""
+			out, err = run_syscall("fab deploy:%(branch)s,%(username)s,%(password)s,%(server)s,%(call)s"%\
+								{'call': command,
+								 'branch': branch,
+								 'username': username,
+								 'password': password,
+								 'server': url})
+			self.display_message(self.current_screen, u'%s --> %s'%(branch, name))()
+			return True, ""
 		return inner_deploy_server
 
 
@@ -298,10 +320,13 @@ class Deployment(ScreenManager):
 					for server in self.checked_servers:
 						name = server.input_box.name_input.text.strip()
 						url = server.input_box.url_input.text.strip()
+						cmd = server.input_box.cmd_input.text.strip()
 						tmp = [self.display_message(screen, '%s authentication check'%name),
 							   self.authentication_check(name, url),
 							   self.display_message(screen, '%s branch check'%self.branch),
-							   self.branch_check(name, self.branch)]
+							   self.branch_check(name, self.branch),
+							   self.display_message(screen, '%s command check'%cmd),
+							   self.command_check(url, cmd)]
 						requests.extend(tmp)
 
 					for server in self.checked_servers:
@@ -310,9 +335,9 @@ class Deployment(ScreenManager):
 						requests.append(self.display_message(screen, '%s deployment...'%name))
 						tmp_call = self.deploy_server(self.username,
 													  self.password,
-													  name, url,
+													  name, url, cmd,
 													  self.branch)
-						#requests.append(tmp_call)
+						requests.append(tmp_call)
 					requests.append(self.display_message(screen, "Deployment complete for branch; '%s'"%self.branch))
 					self.reset_progess()(len(requests))
 					self.deploymentComplition(requests, output=True)
@@ -326,9 +351,6 @@ class DeploymentApp(App):
 
 	def build(self):
 		layout = Deployment()
-#		layout.switch_screen('action_screen', 'up')
-#		layout.load_servers()
-#		layout.servers_correction_screenbased('action')
 		return layout
 
 
