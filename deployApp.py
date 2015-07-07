@@ -49,7 +49,7 @@ class ActionServerItem(BoxLayout):
             self.input_box.name_input.background_color = (1, 1, 1, 1)
             self.input_box.url_input.background_color = (1, 1, 1, 1)
         else:
-            image = Image(source="assets/tick2.png",
+            image = Image(source="assets/tick.png",
                           pos=self.checkbox.pos,
                           size=self.checkbox.size)
             self.checkbox.add_widget(image)
