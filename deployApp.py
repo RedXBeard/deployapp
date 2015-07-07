@@ -18,6 +18,7 @@ import os
 
 
 def findparent(curclass, targetclass):
+    """find wanted widget from selected or current one"""
     reqclass = curclass
     if type(targetclass) in [unicode, str]:
         targetclass_name = targetclass
@@ -52,8 +53,10 @@ class ActionServerItem(BoxLayout):
                           pos=self.checkbox.pos,
                           size=self.checkbox.size)
             self.checkbox.add_widget(image)
-            self.input_box.name_input.background_color = get_color_from_hex('eeeeee')
-            self.input_box.url_input.background_color = get_color_from_hex('eeeeee')
+            name_input = self.input_box.name_input
+            url_input = self.input_box.url_input
+            name_input.background_color = get_color_from_hex('eeeeee')
+            url_input.background_color = get_color_from_hex('eeeeee')
 
 
 class SettingsServerItem(BoxLayout):
@@ -121,7 +124,6 @@ class Deployment(ScreenManager):
         self.current = screen
 
     def fast_switch_screen(self, obj, screen='action_screen', side='up'):
-        print obj
         self.switch_screen(screen, side)
 
     def uname_pword_update(self):
@@ -160,10 +162,11 @@ class Deployment(ScreenManager):
     def authentication_check(self, name, server):
         def inner_authentication_check():
             result = message = ""
-            sys_call_line = 'fab authentication_check:%(username)s,%(password)s,%(server)s'
+            sys_call = 'fab authentication_check:%(username)s,'
+            sys_call += '%(password)s,%(server)s'
             os.chdir('%(path)s' % {'path': PROJECT_PATH})
             out, err = run_syscall(
-                sys_call_line % {
+                sys_call % {
                     'username': self.username,
                     'password': self.password,
                     'server': server})
@@ -180,12 +183,18 @@ class Deployment(ScreenManager):
 
     def branch_check(self, name, branch):
         def inner_branch_check():
+            sys_call = 'git archive %(branch)s --prefix=%(branch)s/ '
+            sys_call += '--remote=git@gitlab.markafoni.net:'
+            sys_call += 'dikeyshop/dikeyshop.git | tar -xf -'
+
             result = message = ""
             os.chdir("/tmp")
-            out, err = run_syscall('git archive %(branch)s --prefix=%(branch)s/ --remote=git@gitlab.markafoni.net:dikeyshop/dikeyshop.git | tar -xf -' % {'branch': branch})
+            out, err = run_syscall(sys_call % {'branch': branch})
             out = out.strip()
 
-            if out.find('tar: Exiting with failure status due to previous errors') != -1 or err.find('tar: Exiting with failure status due to previous errors') != -1:
+            error = 'tar: Exiting with failure status due to previous errors'
+
+            if not filter(lambda x: x.find(error) != -1, [out, err]):
                 result = False
                 message = u"Branch not found for %s" % name
             else:
@@ -197,7 +206,11 @@ class Deployment(ScreenManager):
 
     def command_check(self, server, command):
         def inner_command_check():
-            out, err = run_syscall('fab command_check:%(username)s,%(password)s,%(server)s,%(command)s' % {'username': self.username, 'password': self.password, 'server': server, 'command': command})
+            sys_call = 'fab command_check:%(username)s,%(password)s,'
+            sys_call += '%(server)s,%(command)s'
+            out, err = run_syscall(sys_call % {
+                'username': self.username, 'password': self.password,
+                'server': server, 'command': command})
             if err.strip():
                 return False, '%s command not found on server' % command
             else:
@@ -216,13 +229,19 @@ class Deployment(ScreenManager):
 
     def deploy_server(self, username, password, name, url, command, branch):
         def inner_deploy_server():
-            out, err = run_syscall("fab deploy:%(branch)s,%(username)s,%(password)s,%(server)s,%(call)s" % {
-                'call': command,
-                'branch': branch,
-                'username': username,
-                'password': password,
-                'server': url})
-            self.display_message(self.current_screen, u'%s --> %s' % (branch, name))()
+            sys_call = "fab deploy:%(branch)s,%(username)s,"
+            sys_call += "%(password)s,%(server)s,%(call)s"
+            out, err = run_syscall(
+                sys_call % {
+                    'call': command,
+                    'branch': branch,
+                    'username': username,
+                    'password': password,
+                    'server': url
+                }
+            )
+            self.display_message(
+                self.current_screen, u'%s --> %s' % (branch, name))()
             return True, ""
         return inner_deploy_server
 
@@ -237,7 +256,8 @@ class Deployment(ScreenManager):
             if not output:
                 call = requests[0]
                 call()
-                Clock.schedule_once(lambda dt: self.deploymentComplition(requests[1:]), 1)
+                Clock.schedule_once(
+                    lambda dt: self.deploymentComplition(requests[1:]), 1)
             else:
                 call = requests[0]
                 result, message = call()
@@ -251,16 +271,16 @@ class Deployment(ScreenManager):
                             requests[1:], output=True), 1)
                     anim = Animation(
                         progress=self.progress + self.unit_progress,
-                        t='linear', duration=.2)
+                        t='linear', duration=.5)
                     anim.start(self)
         else:
             ok_but = Button(
-                size=(100, 30), pos=(150, 90), text="[b]COMPLETE[/b]",
+                size=(100, 30), pos=(200, 150), text="[b]COMPLETE[/b]",
                 background_color=get_color_from_hex('97BE0D'),
                 switch_screen='action_screen')
             ok_but.bind(on_release=self.fast_switch_screen)
             self.current_screen.add_widget(ok_but)
-            self.progress = 340
+            self.progress = 440
             return True
 
     def collect_deploy_data(self):
@@ -282,15 +302,16 @@ class Deployment(ScreenManager):
                 self.current_screen.remove_widget(button)
 
     def display_error_buts_deployment(self):
-        cross_img = Image(source="assets/cross2.png", size=(20, 20), pos=(370, 270))
+        cross_img = Image(
+            source="assets/cross2.png", size=(20, 20), pos=(470, 370))
         cross_but = Button(
-            size=(20, 20), pos=(370, 270), switch_screen='action_screen',
+            size=(20, 20), pos=(470, 370), switch_screen='action_screen',
             background_color=get_color_from_hex('404248'))
         cross_but.add_widget(cross_img)
         cross_but.bind(on_release=self.fast_switch_screen)
 
         tryagain_but = Button(
-            size=(100, 30), pos=(150, 90), text="[b]TRY AGAIN[/b]",
+            size=(100, 30), pos=(200, 150), text="[b]TRY AGAIN[/b]",
             background_color=get_color_from_hex('FFCC00'),
             switch_screen='action_screen',)
         tryagain_but.bind(on_release=self.fast_switch_screen)
@@ -306,7 +327,8 @@ class Deployment(ScreenManager):
                 self.display_error_buts_deployment()
             else:
                 if not self.checked_servers:
-                    self.display_message(screen, u"at least check one server please!")()
+                    self.display_message(
+                        screen, u"at least check one server please!")()
                     self.display_error_buts_deployment()
                 else:
                     requests = []
@@ -314,25 +336,33 @@ class Deployment(ScreenManager):
                         name = server.input_box.name_input.text.strip()
                         url = server.input_box.url_input.text.strip()
                         cmd = server.input_box.cmd_input.text.strip()
-                        tmp = [self.display_message(screen, '%s authentication check' % name),
-                               self.authentication_check(name, url),
-                               self.display_message(screen, '%s branch check' % self.branch),
-                               self.branch_check(name, self.branch),
-                               self.display_message(screen, '%s command check' % cmd),
-                               self.command_check(url, cmd)]
+                        tmp = [
+                            self.display_message(
+                                screen, '%s authentication check' % name),
+                            self.authentication_check(name, url),
+                            self.display_message(
+                                screen, '%s branch check' % self.branch),
+                            self.branch_check(name, self.branch),
+                            self.display_message(
+                                screen, '%s command check' % cmd),
+                            self.command_check(url, cmd)
+                        ]
                         requests.extend(tmp)
 
                     for server in self.checked_servers:
                         name = server.input_box.name_input.text.strip()
                         url = server.input_box.url_input.text.strip()
                         cmd = server.input_box.cmd_input.text.strip()
-                        requests.append(self.display_message(screen, '%s deployment...' % name))
+                        requests.append(self.display_message(
+                            screen, '%s deployment...' % name))
                         tmp_call = self.deploy_server(self.username,
                                                       self.password,
                                                       name, url, cmd,
                                                       self.branch)
                         requests.append(tmp_call)
-                    requests.append(self.display_message(screen, "Deployment complete for branch; '%s'" % self.branch))
+                    requests.append(self.display_message(
+                        screen,
+                        "Deployment complete for branch; '%s'" % self.branch))
                     self.reset_progess()(len(requests))
                     self.deploymentComplition(requests, output=True)
 
@@ -351,10 +381,11 @@ if __name__ == "__main__":
     """
     Window sizes and wanted skills are set, then app calls
     """
-    Window.size = (400, 300)
+    Window.size = (500, 400)
     Window.clearcolor = (get_color_from_hex("1C1D20"))
     Window.borderless = False
     Config.set('kivy', 'desktop', 1)
+    Config.set('kivy', 'exit_on_escape', 0)
     Config.set('graphics', 'fullscreen', 0)
     Config.set('graphics', 'resizable', 0)
 

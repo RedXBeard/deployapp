@@ -33,7 +33,7 @@
 <SettingsServerItem>
 	orientation: 'vertical'
 	size_hint: None, None
-	size: 300, 21
+	size: 300, 22
 	input_box: input_box
 
 	BoxLayout:
@@ -70,7 +70,7 @@
         	text: root.name
         	hint_text: 'Name'
         	size_hint: None, None
-        	size: 70, 20
+        	size: 95, 20
         	multiline: False
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
@@ -84,7 +84,7 @@
         	text: root.url
         	hint_text: 'Url'
         	size_hint: None, None
-        	size: 170, 20
+        	size: 245, 20
         	multiline: False
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
@@ -105,13 +105,13 @@
         	on_text_validate: root.add_server()
 
 	Label:
-        size: 300, 1
+        size: 400, 2
 
 
 <ActionServerItem>
 	orientation: 'vertical'
 	size_hint: None, None
-	size: 300, 21
+	size: 300, 22
 	input_box: input_box
 	checkbox: checkbox
 	BoxLayout:
@@ -138,7 +138,7 @@
         	text: root.name
         	hint_text: 'Name'
         	size_hint: None, None
-        	size: 75, 20
+        	size: 95, 20
         	multiline: False
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
@@ -152,7 +152,7 @@
         	text: root.url
         	hint_text: 'Url'
         	size_hint: None, None
-        	size: 275, 20
+        	size: 245, 20
         	multiline: False
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
@@ -166,14 +166,14 @@
         	text: root.cmd
         	hint_text: 'Command'
         	size_hint: None, None
-        	size: 75, 20
+        	size: 105, 20
         	multiline: False
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
         	readonly: True
 
 	Label:
-        size: 300, 1
+        size: 400, 2
 
 <Deployment>
 	action_screen: action_screen
@@ -192,14 +192,14 @@
                 text: '[b]Deployment[/b]'
                 text_size: self.width, None
                 size: 100, 20
-                pos: 10, 270
+                pos: 10, 370
 
         	Button:
                 background_color: get_color_from_hex('404248')
                 text: 'Settings'
                 size_hint: None, None
                 size: 100, 20
-                pos: 290, 270
+                pos: 390, 370
                 on_press: root.load_servers();
                 on_release: root.switch_screen('settings_screen', side='left');root.servers_correction_screenbased('settings')
 
@@ -210,14 +210,14 @@
                 	Rectangle:
                         size: self.size
                         pos: self.pos
-                size: 400, 1
-                pos: 0, 260
+                size: 500, 1
+                pos: 0, 360
 
         	TextInput:
                 id: branch
                 size_hint: None, None
-                pos: 10, 230
-                size: 100, 20
+                pos: 10, 320
+                size: 150, 20
                 hint_text: 'Branch..'
                 multiline: False
                 padding: 6,2,6,2
@@ -226,8 +226,8 @@
         	ListView:
                 id: server_items
                 size_hint: None, None
-                size: 380, 159
-                pos: 10, 61
+                size: 480, 159
+                pos: 10, 141
 
                 adapter: ListAdapter(data=root.servers, cls=Factory.ActionServerItem, args_converter=root.servers_to_items)
 
@@ -238,14 +238,14 @@
                 Rectangle:
                 	size: self.size
                 	pos: self.pos
-        	size: 400, 1
+        	size: 500, 1
         	pos: 0, 50
 
         Button:
         	background_color: get_color_from_hex('E2007A')
         	text: "[b]DEPLOY[/b]"
         	pos: 10, 10
-        	size: 380, 30
+        	size: 480, 30
         	on_press: root.collect_deploy_data();root.switch_screen('deploy_screen', side='down');root.deploy()
 
 	Screen:
@@ -260,14 +260,14 @@
                 text: '[b]Deployment[/b]'
                 text_size: self.width, None
                 size: 100, 20
-                pos: 10, 270
+                pos: 10, 370
 
         	Button:
                 background_color: get_color_from_hex('97BE0D')
                 text: 'Done'
                 size_hint: None, None
                 size: 100, 20
-                pos: 290, 270
+                pos: 390, 370
                 on_press: root.load_servers();
                 on_release: root.switch_screen('action_screen', side='right');root.servers_correction_screenbased('action')
 
@@ -278,21 +278,21 @@
                 	Rectangle:
                         size: self.size
                         pos: self.pos
-                size: 400, 1
-                pos: 0, 260
+                size: 500, 1
+                pos: 0, 360
 
         	Label:
                 text: "Username"
                 size: 80, 20
-                pos: 10, 230
+                pos: 10, 330
                 text_size: self.width, None
 
         	TextInput:
                 id: username
                 text: root.username
                 size_hint: None, None
-                size: 185, 20
-                pos: 10, 205
+                size: 235, 20
+                pos: 10, 305
                 hint_text: 'Username'
                 multiline: False
                 padding: 6,2,6,2
@@ -302,15 +302,15 @@
         	Label:
                 text: "Password"
                 size: 80, 20
-                pos: 205, 230
+                pos: 255, 330
                 text_size: self.width, None
 
         	TextInput:
                 id: password
                 text: root.password
                 size_hint: None, None
-                size: 185, 20
-                pos: 205, 205
+                size: 235, 20
+                pos: 255, 305
                 hint_text: 'Password'
                 multiline: False
                 password: True
@@ -321,12 +321,12 @@
         	Label:
                 text: 'Servers'
                 size: 80, 20
-                pos: 10, 180
+                pos: 10, 270
                 text_size: self.width, None
 
         	ListView:
                 size_hint: None, None
-                size: 400, 165
+                size: 500, 255
                 pos: 10, 10
 
                 adapter: ListAdapter(data=root.servers, cls=Factory.SettingsServerItem, args_converter=root.servers_to_items)
@@ -338,7 +338,7 @@
 
         Label:
         	text: "[color=404248]Processing...[/color]"
-        	pos: 30, 200
+        	pos: 30, 250
         	size: 340, 20
         	text_size: self.width, None
 
@@ -355,7 +355,7 @@
                 	size: self.size[0]-root.progress, self.size[1]
                 	pos: self.pos[0]+root.progress, self.pos[1]
         	id: info
-        	size: 340, 40
-        	pos: 30, 150
+        	size: 440, 40
+        	pos: 30, 200
         	padding_x: 10
         	text_size: self.width, None
