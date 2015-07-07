@@ -5,11 +5,11 @@
 
 <Button>
 	canvas.before:
-		Color:
-			rgba: self.background_color
-		Rectangle:
-			size: self.size
-			pos: self.pos
+        Color:
+        	rgba: self.background_color
+        Rectangle:
+        	size: self.size
+        	pos: self.pos
 	background_down: ""
 	background_disabled_down: ""
 	background_disabled_normal: ""
@@ -37,75 +37,75 @@
 	input_box: input_box
 
 	BoxLayout:
-		orientation: 'horizontal'
-		size: 300, 20
-		id: input_box
+        orientation: 'horizontal'
+        size: 300, 20
+        id: input_box
 
-		name_input: name
-		url_input: url
-		cmd_input: cmd
+        name_input: name
+        url_input: url
+        cmd_input: cmd
 
-		Button:
-			id: del_but
-			on_parent: if not root.name: root.input_box.remove_widget(del_but)
-			background_color: get_color_from_hex('E2007A')
-			size: 20, 20
-			font_size: 10
-			on_release: root.delete_server()
-			Image:
-				source: "assets/cross2.png"
-				pos: self.parent.pos
-				size: self.parent.size
+        Button:
+        	id: del_but
+        	on_parent: if not root.name: root.input_box.remove_widget(del_but)
+        	background_color: get_color_from_hex('E2007A')
+        	size: 20, 20
+        	font_size: 10
+        	on_release: root.delete_server()
+        	Image:
+                source: "assets/cross2.png"
+                pos: self.parent.pos
+                size: self.parent.size
 
-		Label:
-			id: del_space
-			on_parent: if root.name: root.input_box.remove_widget(del_space)
-			size: 20, 20
+        Label:
+        	id: del_space
+        	on_parent: if root.name: root.input_box.remove_widget(del_space)
+        	size: 20, 20
 
-		Label:
-			size: 5, 20
+        Label:
+        	size: 5, 20
 
-		TextInput:
-			id: name
-			text: root.name
-			hint_text: 'Name'
-			size_hint: None, None
-			size: 70, 20
-			multiline: False
-			padding: 6,2,6,2
-			background_color: 1, 1, 1, 1
-			on_text_validate: root.add_server()
+        TextInput:
+        	id: name
+        	text: root.name
+        	hint_text: 'Name'
+        	size_hint: None, None
+        	size: 70, 20
+        	multiline: False
+        	padding: 6,2,6,2
+        	background_color: 1, 1, 1, 1
+        	on_text_validate: root.add_server()
 
-		Label:
-			size: 5, 20
+        Label:
+        	size: 5, 20
 
-		TextInput:
-			id: url
-			text: root.url
-			hint_text: 'Url'
-			size_hint: None, None
-			size: 170, 20
-			multiline: False
-			padding: 6,2,6,2
-			background_color: 1, 1, 1, 1
-			on_text_validate: root.add_server()
+        TextInput:
+        	id: url
+        	text: root.url
+        	hint_text: 'Url'
+        	size_hint: None, None
+        	size: 170, 20
+        	multiline: False
+        	padding: 6,2,6,2
+        	background_color: 1, 1, 1, 1
+        	on_text_validate: root.add_server()
 
-		Label:
-			size: 5, 20
+        Label:
+        	size: 5, 20
 
-		TextInput:
-			id: cmd
-			text: root.cmd
-			hint_text: 'Command'
-			size_hint: None, None
-			size: 105, 20
-			multiline: False
-			padding: 6,2,6,2
-			background_color: 1, 1, 1, 1
-			on_text_validate: root.add_server()
+        TextInput:
+        	id: cmd
+        	text: root.cmd
+        	hint_text: 'Command'
+        	size_hint: None, None
+        	size: 105, 20
+        	multiline: False
+        	padding: 6,2,6,2
+        	background_color: 1, 1, 1, 1
+        	on_text_validate: root.add_server()
 
 	Label:
-		size: 300, 1
+        size: 300, 1
 
 
 <ActionServerItem>
@@ -115,65 +115,65 @@
 	input_box: input_box
 	checkbox: checkbox
 	BoxLayout:
-		orientation: 'horizontal'
-		size: 300, 20
-		id: input_box
+        orientation: 'horizontal'
+        size: 300, 20
+        id: input_box
 
-		name_input: name
-		url_input: url
-		cmd_input: cmd
+        name_input: name
+        url_input: url
+        cmd_input: cmd
 
-		Button:
-			background_color: get_color_from_hex('97BE0D')
-			id: checkbox
-			size: 20, 20
-			font_size: 10
-			on_press: root.pressed_but()
+        Button:
+        	background_color: get_color_from_hex('97BE0D')
+        	id: checkbox
+        	size: 20, 20
+        	font_size: 10
+        	on_press: root.pressed_but()
 
-		Label:
-			size: 5, 20
+        Label:
+        	size: 5, 20
 
-		TextInput:
-			id: name
-			text: root.name
-			hint_text: 'Name'
-			size_hint: None, None
-			size: 75, 20
-			multiline: False
-			padding: 6,2,6,2
-			background_color: 1, 1, 1, 1
-			readonly: True
+        TextInput:
+        	id: name
+        	text: root.name
+        	hint_text: 'Name'
+        	size_hint: None, None
+        	size: 75, 20
+        	multiline: False
+        	padding: 6,2,6,2
+        	background_color: 1, 1, 1, 1
+        	readonly: True
 
-		Label:
-			size: 5, 20
+        Label:
+        	size: 5, 20
 
-		TextInput:
-			id: url
-			text: root.url
-			hint_text: 'Url'
-			size_hint: None, None
-			size: 275, 20
-			multiline: False
-			padding: 6,2,6,2
-			background_color: 1, 1, 1, 1
-			readonly: True
+        TextInput:
+        	id: url
+        	text: root.url
+        	hint_text: 'Url'
+        	size_hint: None, None
+        	size: 275, 20
+        	multiline: False
+        	padding: 6,2,6,2
+        	background_color: 1, 1, 1, 1
+        	readonly: True
 
-		Label:
-			size: 5, 20
+        Label:
+        	size: 5, 20
 
-		TextInput:
-			id: cmd
-			text: root.cmd
-			hint_text: 'Command'
-			size_hint: None, None
-			size: 75, 20
-			multiline: False
-			padding: 6,2,6,2
-			background_color: 1, 1, 1, 1
-			readonly: True
+        TextInput:
+        	id: cmd
+        	text: root.cmd
+        	hint_text: 'Command'
+        	size_hint: None, None
+        	size: 75, 20
+        	multiline: False
+        	padding: 6,2,6,2
+        	background_color: 1, 1, 1, 1
+        	readonly: True
 
 	Label:
-		size: 300, 1
+        size: 300, 1
 
 <Deployment>
 	action_screen: action_screen
@@ -181,181 +181,181 @@
 	deploy_screen: deploy_screen
 
 	Screen:
-		id: action_screen
-		name: 'action_screen'
+        id: action_screen
+        name: 'action_screen'
 
-		server_items: server_items
-		branch: branch
+        server_items: server_items
+        branch: branch
 
-		FloatLayout:
-			Label:
-				text: '[b]Deployment[/b]'
-				text_size: self.width, None
-				size: 100, 20
-				pos: 10, 270
+        FloatLayout:
+        	Label:
+                text: '[b]Deployment[/b]'
+                text_size: self.width, None
+                size: 100, 20
+                pos: 10, 270
 
-			Button:
-				background_color: get_color_from_hex('404248')
-				text: 'Settings'
-				size_hint: None, None
-				size: 100, 20
-				pos: 290, 270
-				on_press: root.load_servers();
-				on_release: root.switch_screen('settings_screen', side='left');root.servers_correction_screenbased('settings')
+        	Button:
+                background_color: get_color_from_hex('404248')
+                text: 'Settings'
+                size_hint: None, None
+                size: 100, 20
+                pos: 290, 270
+                on_press: root.load_servers();
+                on_release: root.switch_screen('settings_screen', side='left');root.servers_correction_screenbased('settings')
 
-			Label:
-				canvas.before:
-					Color:
-						rgba: 0,0,0,1
-					Rectangle:
-						size: self.size
-						pos: self.pos
-				size: 400, 1
-				pos: 0, 260
+        	Label:
+                canvas.before:
+                	Color:
+                        rgba: 0,0,0,1
+                	Rectangle:
+                        size: self.size
+                        pos: self.pos
+                size: 400, 1
+                pos: 0, 260
 
-			TextInput:
-				id: branch
-				size_hint: None, None
-				pos: 10, 230
-				size: 100, 20
-				hint_text: 'Branch..'
-				multiline: False
-				padding: 6,2,6,2
-				background_color: 1, 1, 1, 1
+        	TextInput:
+                id: branch
+                size_hint: None, None
+                pos: 10, 230
+                size: 100, 20
+                hint_text: 'Branch..'
+                multiline: False
+                padding: 6,2,6,2
+                background_color: 1, 1, 1, 1
 
-			ListView:
-				id: server_items
-				size_hint: None, None
-				size: 380, 159
-				pos: 10, 61
+        	ListView:
+                id: server_items
+                size_hint: None, None
+                size: 380, 159
+                pos: 10, 61
 
-				adapter: ListAdapter(data=root.servers, cls=Factory.ActionServerItem, args_converter=root.servers_to_items)
+                adapter: ListAdapter(data=root.servers, cls=Factory.ActionServerItem, args_converter=root.servers_to_items)
 
-		Label:
-			canvas.before:
-				Color:
-					rgba: 0,0,0,1
-				Rectangle:
-					size: self.size
-					pos: self.pos
-			size: 400, 1
-			pos: 0, 50
+        Label:
+        	canvas.before:
+                Color:
+                	rgba: 0,0,0,1
+                Rectangle:
+                	size: self.size
+                	pos: self.pos
+        	size: 400, 1
+        	pos: 0, 50
 
-		Button:
-			background_color: get_color_from_hex('E2007A')
-			text: "[b]DEPLOY[/b]"
-			pos: 10, 10
-			size: 380, 30
-			on_press: root.collect_deploy_data();root.switch_screen('deploy_screen', side='down');root.deploy()
+        Button:
+        	background_color: get_color_from_hex('E2007A')
+        	text: "[b]DEPLOY[/b]"
+        	pos: 10, 10
+        	size: 380, 30
+        	on_press: root.collect_deploy_data();root.switch_screen('deploy_screen', side='down');root.deploy()
 
 	Screen:
-		id: settings_screen
-		name: 'settings_screen'
+        id: settings_screen
+        name: 'settings_screen'
 
-		username_input: username
-		password_input: password
+        username_input: username
+        password_input: password
 
-		FloatLayout:
-			Label:
-				text: '[b]Deployment[/b]'
-				text_size: self.width, None
-				size: 100, 20
-				pos: 10, 270
+        FloatLayout:
+        	Label:
+                text: '[b]Deployment[/b]'
+                text_size: self.width, None
+                size: 100, 20
+                pos: 10, 270
 
-			Button:
-				background_color: get_color_from_hex('97BE0D')
-				text: 'Done'
-				size_hint: None, None
-				size: 100, 20
-				pos: 290, 270
-				on_press: root.load_servers();
-				on_release: root.switch_screen('action_screen', side='right');root.servers_correction_screenbased('action')
+        	Button:
+                background_color: get_color_from_hex('97BE0D')
+                text: 'Done'
+                size_hint: None, None
+                size: 100, 20
+                pos: 290, 270
+                on_press: root.load_servers();
+                on_release: root.switch_screen('action_screen', side='right');root.servers_correction_screenbased('action')
 
-			Label:
-				canvas.before:
-					Color:
-						rgba: 0,0,0,1
-					Rectangle:
-						size: self.size
-						pos: self.pos
-				size: 400, 1
-				pos: 0, 260
+        	Label:
+                canvas.before:
+                	Color:
+                        rgba: 0,0,0,1
+                	Rectangle:
+                        size: self.size
+                        pos: self.pos
+                size: 400, 1
+                pos: 0, 260
 
-			Label:
-				text: "Username"
-				size: 80, 20
-				pos: 10, 230
-				text_size: self.width, None
+        	Label:
+                text: "Username"
+                size: 80, 20
+                pos: 10, 230
+                text_size: self.width, None
 
-			TextInput:
-				id: username
-				text: root.username
-				size_hint: None, None
-				size: 185, 20
-				pos: 10, 205
-				hint_text: 'Username'
-				multiline: False
-				padding: 6,2,6,2
-				background_color: 1, 1, 1, 1
-				on_text_validate: root.uname_pword_update()
+        	TextInput:
+                id: username
+                text: root.username
+                size_hint: None, None
+                size: 185, 20
+                pos: 10, 205
+                hint_text: 'Username'
+                multiline: False
+                padding: 6,2,6,2
+                background_color: 1, 1, 1, 1
+                on_text_validate: root.uname_pword_update()
 
-			Label:
-				text: "Password"
-				size: 80, 20
-				pos: 205, 230
-				text_size: self.width, None
+        	Label:
+                text: "Password"
+                size: 80, 20
+                pos: 205, 230
+                text_size: self.width, None
 
-			TextInput:
-				id: password
-				text: root.password
-				size_hint: None, None
-				size: 185, 20
-				pos: 205, 205
-				hint_text: 'Password'
-				multiline: False
-				password: True
-				padding: 6,2,6,2
-				background_color: 1, 1, 1, 1
-				on_text_validate: root.uname_pword_update()
+        	TextInput:
+                id: password
+                text: root.password
+                size_hint: None, None
+                size: 185, 20
+                pos: 205, 205
+                hint_text: 'Password'
+                multiline: False
+                password: True
+                padding: 6,2,6,2
+                background_color: 1, 1, 1, 1
+                on_text_validate: root.uname_pword_update()
 
-			Label:
-				text: 'Servers'
-				size: 80, 20
-				pos: 10, 180
-				text_size: self.width, None
+        	Label:
+                text: 'Servers'
+                size: 80, 20
+                pos: 10, 180
+                text_size: self.width, None
 
-			ListView:
-				size_hint: None, None
-				size: 400, 165
-				pos: 10, 10
+        	ListView:
+                size_hint: None, None
+                size: 400, 165
+                pos: 10, 10
 
-				adapter: ListAdapter(data=root.servers, cls=Factory.SettingsServerItem, args_converter=root.servers_to_items)
+                adapter: ListAdapter(data=root.servers, cls=Factory.SettingsServerItem, args_converter=root.servers_to_items)
 	Screen:
-		id: deploy_screen
-		name: "deploy_screen"
+        id: deploy_screen
+        name: "deploy_screen"
 
-		info: info
+        info: info
 
-		Label:
-			text: "[color=404248]Processing...[/color]"
-			pos: 30, 200
-			size: 340, 20
-			text_size: self.width, None
+        Label:
+        	text: "[color=404248]Processing...[/color]"
+        	pos: 30, 200
+        	size: 340, 20
+        	text_size: self.width, None
 
-		Label:
-			canvas.before:
-				Color:
-					rgba: get_color_from_hex('97BE0D')
-				Rectangle:
-					size: root.progress, self.size[1]
-					pos: self.pos
-				Color:
-					rgba: get_color_from_hex('404248')
-				Rectangle:
-					size: self.size[0]-root.progress, self.size[1]
-					pos: self.pos[0]+root.progress, self.pos[1]
-			id: info
-			size: 340, 40
-			pos: 30, 150
-			padding_x: 10
-			text_size: self.width, None
+        Label:
+        	canvas.before:
+                Color:
+                	rgba: get_color_from_hex('97BE0D')
+                Rectangle:
+                	size: root.progress, self.size[1]
+                	pos: self.pos
+                Color:
+                	rgba: get_color_from_hex('404248')
+                Rectangle:
+                	size: self.size[0]-root.progress, self.size[1]
+                	pos: self.pos[0]+root.progress, self.pos[1]
+        	id: info
+        	size: 340, 40
+        	pos: 30, 150
+        	padding_x: 10
+        	text_size: self.width, None
