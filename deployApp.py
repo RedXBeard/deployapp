@@ -48,6 +48,7 @@ class ActionServerItem(BoxLayout):
             self.checkbox.remove_widget(images[0])
             self.input_box.name_input.background_color = (1, 1, 1, 1)
             self.input_box.url_input.background_color = (1, 1, 1, 1)
+            self.input_box.cmd_input.background_color = (1, 1, 1, 1)
         else:
             image = Image(source="assets/tick.png",
                           pos=self.checkbox.pos,
@@ -55,22 +56,27 @@ class ActionServerItem(BoxLayout):
             self.checkbox.add_widget(image)
             name_input = self.input_box.name_input
             url_input = self.input_box.url_input
+            cmd_input = self.input_box.cmd_input
             name_input.background_color = get_color_from_hex('eeeeee')
             url_input.background_color = get_color_from_hex('eeeeee')
+            cmd_input.background_color = get_color_from_hex('eeeeee')
 
 
 class SettingsServerItem(BoxLayout):
     name = StringProperty("")
     url = StringProperty("")
+    repo = StringProperty("")
     cmd = StringProperty("")
 
     def add_server(self, *args):
         name = self.input_box.name_input.text.strip()
         url = self.input_box.url_input.text.strip()
+        repo = self.input_box.repo_input.text.strip()
         cmd = self.input_box.cmd_input.text.strip()
-        if name and url and cmd:
+        if name and url and cmd and repo:
             servers = DB.store_get('servers')
-            servers.append({'name': name, 'url': url, 'cmd': cmd})
+            servers.append({'name': name, 'url': url,
+                            'cmd': cmd, 'repo': repo})
             DB.store_put('servers', servers)
             DB.store_sync()
             root = findparent(self, Deployment)
@@ -80,8 +86,9 @@ class SettingsServerItem(BoxLayout):
     def delete_server(self, *args):
         name = self.input_box.name_input.text.strip()
         url = self.input_box.url_input.text.strip()
+        repo = self.input_box.repo_input.text.strip()
         cmd = self.input_box.cmd_input.text.strip()
-        tmp = {'name': name, 'url': url, 'cmd': cmd}
+        tmp = {'name': name, 'url': url, 'cmd': cmd, 'repo': repo}
         servers = DB.store_get('servers')
         if filter(lambda x: x == tmp, servers):
             servers.pop(servers.index(tmp))
@@ -113,11 +120,10 @@ class Deployment(ScreenManager):
         server_datas = DB.store_get('servers')
         self.servers = []
         for server in server_datas:
-            name = 'name' in server and server['name'] or ''
-            url = 'url' in server and server['url'] or ''
-            cmd = 'cmd' in server and server['cmd'] or ''
-            self.servers.append({'name': name, 'url': url, 'cmd': cmd})
-        self.servers.append({'name': '', 'url': '', 'cmd': ''})
+            self.servers.append({
+                'name': server.get('name', ''), 'url': server.get('url', ''),
+                'cmd': server.get('cmd', ''), 'repo': server.get('repo', '')})
+        self.servers.append({'name': '', 'url': '', 'cmd': '', 'repo': ''})
 
     def switch_screen(self, screen, side='up'):
         self.transition = SlideTransition(direction=side)
@@ -139,8 +145,10 @@ class Deployment(ScreenManager):
 
     def servers_correction_screenbased(self, screen):
         emptyslot = filter(
-            lambda x: x['name'].strip() == '' or (
-                x['url'].strip() == '' or x['cmd'].strip() == ''),
+            lambda x: (x['name'].strip() == '' or
+                       x['url'].strip() == '' or
+                       x['cmd'].strip() == '' or
+                       x['repo'].strip() == ''),
             self.servers)
         if emptyslot:
             for slot in emptyslot:
@@ -150,20 +158,21 @@ class Deployment(ScreenManager):
             pass
 
         if screen == 'settings':
-            self.servers.append({'name': "", 'url': "", 'cmd': ""})
+            self.servers.append({'name': "", 'url': "", 'cmd': "", 'repo': ""})
 
     def servers_to_items(self, raw_index, item):
         return {
             'name': item['name'],
             'url': item['url'],
-            'cmd': item['cmd']
+            'cmd': item['cmd'],
+            'repo': item['repo']
         }
 
     def authentication_check(self, name, server):
         def inner_authentication_check():
             result = message = ""
-            sys_call = 'fab authentication_check:%(username)s,'
-            sys_call += '%(password)s,%(server)s'
+            sys_call = ('fab authentication_check:%(username)s,'
+                        '%(password)s,%(server)s')
             os.chdir('%(path)s' % {'path': PROJECT_PATH})
             out, err = run_syscall(
                 sys_call % {
@@ -181,33 +190,39 @@ class Deployment(ScreenManager):
             return result, message
         return inner_authentication_check
 
-    def branch_check(self, name, branch):
+    def branch_check(self, name, branch, repo):
         def inner_branch_check():
-            sys_call = 'git archive %(branch)s --prefix=%(branch)s/ '
-            sys_call += '--remote=git@gitlab.markafoni.net:'
-            sys_call += 'dikeyshop/dikeyshop.git | tar -xf -'
+            try:
+                import gitlab
+                git = gitlab.Gitlab("http://gitlab.markafoni.net")
+                git.login(self.username, self.password)
+                try:
+                    origin_repo_id = filter(
+                        lambda x: (
+                            x['web_url'] ==
+                            "http://gitlab.markafoni.net/%s" %
+                            repo.strip('/')),
+                        git.getprojects(per_page=1000))[0].get('id', 0)
+                except:
+                    raise Exception(u'Repository could not found.')
 
-            result = message = ""
-            os.chdir("/tmp")
-            out, err = run_syscall(sys_call % {'branch': branch})
-            out = out.strip()
+                branches = filter(lambda x: x.get('name', '') == branch,
+                                  git.getbranches(origin_repo_id))
 
-            error = 'tar: Exiting with failure status due to previous errors'
-
-            if not filter(lambda x: x.find(error) != -1, [out, err]):
-                result = False
-                message = u"Branch not found for %s" % name
-            else:
-                out, err = run_syscall("rm -rf %s" % branch)
                 result = True
-            os.chdir(PROJECT_PATH)
-            return result, message
+                message = ""
+                if not branches:
+                    result = False
+                    message = u"Branch not found for %s" % name
+                return result, message
+            except Exception, e:
+                return False, e.message
         return inner_branch_check
 
     def command_check(self, server, command):
         def inner_command_check():
-            sys_call = 'fab command_check:%(username)s,%(password)s,'
-            sys_call += '%(server)s,%(command)s'
+            sys_call = ('fab command_check:%(username)s,%(password)s,'
+                        '%(server)s,%(command)s')
             out, err = run_syscall(sys_call % {
                 'username': self.username, 'password': self.password,
                 'server': server, 'command': command})
@@ -229,8 +244,9 @@ class Deployment(ScreenManager):
 
     def deploy_server(self, username, password, name, url, command, branch):
         def inner_deploy_server():
-            sys_call = "fab deploy:%(branch)s,%(username)s,"
-            sys_call += "%(password)s,%(server)s,%(call)s"
+            sys_call = ("fab start_deployment:%(branch)s,%(username)s,"
+                        "%(password)s,%(server)s,%(call)s")
+
             out, err = run_syscall(
                 sys_call % {
                     'call': command,
@@ -240,18 +256,24 @@ class Deployment(ScreenManager):
                     'server': url
                 }
             )
-            self.display_message(
-                self.current_screen, u'%s --> %s' % (branch, name))()
-            return True, ""
+            if not err:
+                self.display_message(
+                    self.current_screen, u'%s --> %s' % (branch, name))()
+                return True, ""
+            else:
+                print err
+                return False, ("%s could not be deployed "
+                               "to %s server" % (branch, name.capitalize()))
+
         return inner_deploy_server
 
     def reset_progess(self):
         def inner_reset_progress(process_count):
-            self.unit_progress = 340 / process_count
+            self.unit_progress = 440 / process_count
             self.progress = 0
         return inner_reset_progress
 
-    def deploymentComplition(self, requests, output=False):
+    def deploymentComplition(self, requests, output=False, call_count=1):
         if requests:
             if not output:
                 call = requests[0]
@@ -268,9 +290,10 @@ class Deployment(ScreenManager):
                 else:
                     Clock.schedule_once(
                         lambda dt: self.deploymentComplition(
-                            requests[1:], output=True), 1)
+                            requests[1:], output=True,
+                            call_count=call_count + 1), 1)
                     anim = Animation(
-                        progress=self.progress + self.unit_progress,
+                        progress=self.unit_progress * call_count,
                         t='linear', duration=.5)
                     anim.start(self)
         else:
@@ -280,7 +303,8 @@ class Deployment(ScreenManager):
                 switch_screen='action_screen')
             ok_but.bind(on_release=self.fast_switch_screen)
             self.current_screen.add_widget(ok_but)
-            self.progress = 440
+            anim = Animation(progress=440, t='linear', duration=.5)
+            anim.start(self)
             return True
 
     def collect_deploy_data(self):
@@ -336,13 +360,17 @@ class Deployment(ScreenManager):
                         name = server.input_box.name_input.text.strip()
                         url = server.input_box.url_input.text.strip()
                         cmd = server.input_box.cmd_input.text.strip()
+                        server_datas = DB.store_get('servers')
+                        repo = filter(
+                            lambda x: x['name'] == name, server_datas)[0].get(
+                                'repo')
                         tmp = [
                             self.display_message(
                                 screen, '%s authentication check' % name),
                             self.authentication_check(name, url),
                             self.display_message(
                                 screen, '%s branch check' % self.branch),
-                            self.branch_check(name, self.branch),
+                            self.branch_check(name, self.branch, repo),
                             self.display_message(
                                 screen, '%s command check' % cmd),
                             self.command_check(url, cmd)
@@ -353,6 +381,9 @@ class Deployment(ScreenManager):
                         name = server.input_box.name_input.text.strip()
                         url = server.input_box.url_input.text.strip()
                         cmd = server.input_box.cmd_input.text.strip()
+                        repo = filter(
+                            lambda x: x['name'] == name, server_datas)[0].get(
+                                'repo')
                         requests.append(self.display_message(
                             screen, '%s deployment...' % name))
                         tmp_call = self.deploy_server(self.username,

@@ -6,16 +6,39 @@
 <Button>
 	canvas.before:
         Color:
-        	rgba: self.background_color
+            rgba: self.background_color
         Rectangle:
-        	size: self.size
-        	pos: self.pos
-	background_down: ""
+            pos: self.pos[0], self.pos[1]+8/2
+            size: self.size[0], self.size[1]-8
+        Rectangle:
+            pos: self.pos[0]+8/2, self.pos[1]
+            size: self.size[0]-8, self.size[1]
+        Ellipse:
+            size: 8, 8
+            pos: self.pos[0], self.pos[1]
+        Ellipse:
+            size: 8, 8
+            pos: self.pos[0], self.pos[1]+self.height-8
+        Ellipse:
+            size: 8, 8
+            pos: self.pos[0]+self.width-8, self.pos[1]
+        Ellipse:
+            size: 8, 8
+            pos: self.pos[0]+self.width-8, self.pos[1]+self.height-8
+	# canvas.before:
+    #     Color:
+    #     	rgba: self.background_color
+    #     Rectangle:
+    #     	size: self.size
+    #     	pos: self.pos
+    background_normal: 'assets/trans.png'
+    background_down: 'assets/trans.png'
 	background_disabled_down: ""
 	background_disabled_normal: ""
 	markup: True
 	shorten: True
 	shorten_from: 'right'
+
 
 <Label>
 	markup: True
@@ -24,10 +47,10 @@
 	size_hint: None, None
 
 <TextInput>
-	background_disabled_active: ""
-	background_disabled_normal: ""
-	background_normal: ""
-	background_active: ""
+	background_disabled_active: ''
+	background_disabled_normal: ''
+	background_normal: ''
+	background_active: ''
 	font_size: 13
 
 <SettingsServerItem>
@@ -36,13 +59,16 @@
 	size: 300, 22
 	input_box: input_box
 
-	BoxLayout:
-        orientation: 'horizontal'
-        size: 300, 20
-        id: input_box
+	GridLayout:
+    	id: input_box
+
+		cols: 5
+		rows: 1
+		spacing: 5, 5
 
         name_input: name
         url_input: url
+		repo_input: repo
         cmd_input: cmd
 
         Button:
@@ -62,9 +88,6 @@
         	on_parent: if root.name: root.input_box.remove_widget(del_space)
         	size: 20, 20
 
-        Label:
-        	size: 5, 20
-
         TextInput:
         	id: name
         	text: root.name
@@ -76,22 +99,27 @@
         	background_color: 1, 1, 1, 1
         	on_text_validate: root.add_server()
 
-        Label:
-        	size: 5, 20
+		TextInput:
+        	id: repo
+        	text: root.repo
+        	hint_text: 'Repo Url'
+        	size_hint: None, None
+        	size: 122, 20
+        	multiline: False
+        	padding: 6,2,6,2
+        	background_color: 1, 1, 1, 1
+        	on_text_validate: root.add_server()
 
         TextInput:
         	id: url
         	text: root.url
         	hint_text: 'Url'
         	size_hint: None, None
-        	size: 245, 20
+        	size: 123, 20
         	multiline: False
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
         	on_text_validate: root.add_server()
-
-        Label:
-        	size: 5, 20
 
         TextInput:
         	id: cmd
@@ -104,20 +132,18 @@
         	background_color: 1, 1, 1, 1
         	on_text_validate: root.add_server()
 
-	Label:
-        size: 400, 2
-
-
 <ActionServerItem>
 	orientation: 'vertical'
 	size_hint: None, None
 	size: 300, 22
 	input_box: input_box
 	checkbox: checkbox
-	BoxLayout:
-        orientation: 'horizontal'
-        size: 300, 20
-        id: input_box
+	GridLayout:
+    	id: input_box
+
+		cols: 4
+		rows: 1
+		spacing: 5, 5
 
         name_input: name
         url_input: url
@@ -130,9 +156,6 @@
         	font_size: 10
         	on_press: root.pressed_but()
 
-        Label:
-        	size: 5, 20
-
         TextInput:
         	id: name
         	text: root.name
@@ -143,9 +166,6 @@
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
         	readonly: True
-
-        Label:
-        	size: 5, 20
 
         TextInput:
         	id: url
@@ -158,9 +178,6 @@
         	background_color: 1, 1, 1, 1
         	readonly: True
 
-        Label:
-        	size: 5, 20
-
         TextInput:
         	id: cmd
         	text: root.cmd
@@ -171,9 +188,6 @@
         	padding: 6,2,6,2
         	background_color: 1, 1, 1, 1
         	readonly: True
-
-	Label:
-        size: 400, 2
 
 <Deployment>
 	action_screen: action_screen
