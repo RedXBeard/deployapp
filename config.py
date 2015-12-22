@@ -26,19 +26,15 @@ def run_syscall(cmd, serve_output=False):
     p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
     # out, err = "", ""
-    # print "COMMAND: ", cmd
     # while p.poll() in (None, 0, 1):
-    #     print "BARBAROS"
     #     output = p.stdout.readline()
     #     error = p.stderr.readline()
     #     out += output
     #     err += error
     #     print output, error
     #     if output == "":
-    #         print "FUCKED"
     #         break
     #     time.sleep(1)
-    # print "exited", p.poll()
     # try:
     #     p.terminate()
     # except OSError:
