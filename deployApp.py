@@ -15,6 +15,7 @@ from kivy.properties import (
     NumericProperty)
 from config import PROJECT_PATH, DB, run_syscall
 import os
+import gitlab
 
 
 def findparent(curclass, targetclass):
@@ -193,7 +194,6 @@ class Deployment(ScreenManager):
     def branch_check(self, name, branch, repo):
         def inner_branch_check():
             try:
-                import gitlab
                 git = gitlab.Gitlab("http://gitlab.markafoni.net")
                 git.login(self.username, self.password)
                 try:
