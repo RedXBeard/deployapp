@@ -402,6 +402,8 @@ class DeploymentApp(App):
     def __init__(self, *args, **kwargs):
         super(DeploymentApp, self).__init__(*args, **kwargs)
         Builder.load_file('%s/assets/style.kv' % PROJECT_PATH)
+        self.title = 'Deploy App'
+        self.icon = 'assets/deployapp.png'
 
     def build(self):
         layout = Deployment()
