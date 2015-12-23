@@ -26,4 +26,4 @@ To run, in cloned dir,
 $> python main.py
 ```
 ### MacOS
-Come up soon...
+If you want clean install please download [MKFDeploymentApp.dmg](https://app.box.com/s/drl3681ks0o862uvyybwfdwxfprd4iue).
